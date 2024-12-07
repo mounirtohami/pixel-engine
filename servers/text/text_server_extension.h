@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #ifndef TEXT_SERVER_EXTENSION_H
 #define TEXT_SERVER_EXTENSION_H
 
@@ -129,6 +140,11 @@ public:
 	virtual TextServer::FontAntialiasing font_get_antialiasing(const RID &p_font_rid) const override;
 	GDVIRTUAL2(_font_set_antialiasing, RID, TextServer::FontAntialiasing);
 	GDVIRTUAL1RC(TextServer::FontAntialiasing, _font_get_antialiasing, RID);
+
+	virtual void font_set_lcd_subpixel_layout(const RID &p_font_rid, TextServer::FontLCDSubpixelLayout p_lcd_subpixel_layout) override;
+	virtual TextServer::FontLCDSubpixelLayout font_get_lcd_subpixel_layout(const RID &p_font_rid) const override;
+	GDVIRTUAL2(_font_set_lcd_subpixel_layout, RID, TextServer::FontLCDSubpixelLayout);
+	GDVIRTUAL1RC(TextServer::FontLCDSubpixelLayout, _font_get_lcd_subpixel_layout, RID);
 
 	virtual void font_set_disable_embedded_bitmaps(const RID &p_font_rid, bool p_disable_embedded_bitmaps) override;
 	virtual bool font_get_disable_embedded_bitmaps(const RID &p_font_rid) const override;
