@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "register_scene_types.h"
 
 #include "core/config/project_settings.h"
@@ -51,6 +62,7 @@
 #include "scene/gui/check_box.h"
 #include "scene/gui/check_button.h"
 #include "scene/gui/code_edit.h"
+#include "scene/gui/color_button.h"
 #include "scene/gui/color_picker.h"
 #include "scene/gui/color_rect.h"
 #include "scene/gui/control.h"
@@ -466,6 +478,7 @@ void register_scene_types() {
 	GDREGISTER_CLASS(OptionButton);
 	GDREGISTER_CLASS(SpinBox);
 	GDREGISTER_CLASS(ColorPicker);
+	GDREGISTER_CLASS(ColorButton);
 	GDREGISTER_CLASS(ColorPickerButton);
 	GDREGISTER_CLASS(RichTextLabel);
 	GDREGISTER_CLASS(RichTextEffect);

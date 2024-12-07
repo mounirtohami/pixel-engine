@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "default_theme.h"
 
 #include "core/io/image.h"
@@ -1080,6 +1091,18 @@ void fill_default_theme(Ref<Theme> &theme, const Ref<Font> &default_font, const 
 
 		theme->set_icon("color_hue", "ColorPicker", hue_texture);
 	}
+
+	// ColorButton
+
+	theme->set_stylebox(CoreStringName(normal), "ColorButton", make_flat_stylebox(style_normal_color, 4, 4, 4, 4, default_corner_radius));
+	Ref<StyleBoxFlat> color_button_pressed = make_flat_stylebox(style_pressed_color, 4, 4, 4, 4, default_corner_radius, true, 2);
+	theme->set_stylebox(SceneStringName(pressed), "ColorButton", color_button_pressed);
+	theme->set_stylebox("hover_pressed", "ColorButton", color_button_pressed);
+	theme->set_stylebox("hover", "ColorButton", make_flat_stylebox(style_hover_color, 4, 4, 4, 4, default_corner_radius));
+	theme->set_stylebox("disabled", "ColorButton", make_flat_stylebox(style_disabled_color, 4, 4, 4, 4, default_corner_radius));
+	theme->set_stylebox("focus", "ColorButton", make_flat_stylebox(style_focus_color, 0, 0, 0, 0, MAX(default_corner_radius - 1, 2), false, 3));
+	theme->set_icon("bg", "ColorButton", icons["mini_checkerboard"]);
+	theme->set_icon("overbright_indicator", "ColorButton", icons["color_picker_overbright"]);
 
 	// ColorPickerButton
 
