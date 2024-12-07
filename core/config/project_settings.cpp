@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "project_settings.h"
 
 #include "core/core_bind.h" // For Compression enum.
@@ -1052,7 +1063,9 @@ Error ProjectSettings::save_custom(const String &p_path, const CustomMap &p_cust
 		}
 	}
 	project_features = _trim_to_supported_features(project_features);
-	set_setting("application/config/features", project_features);
+	if (get_setting("application/config/features") != project_features) {
+		set_setting("application/config/features", project_features);
+	}
 #endif // TOOLS_ENABLED
 
 	RBSet<_VCSort> vclist;
