@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "button.h"
 
 #include "scene/theme/theme_db.h"
@@ -38,7 +49,7 @@ Size2 Button::get_minimum_size() const {
 		_icon = theme_cache.icon;
 	}
 
-	return get_minimum_size_for_text_and_icon("", _icon);
+	return _get_final_minimum_size(get_minimum_size_for_text_and_icon("", _icon));
 }
 
 void Button::_set_internal_margin(Side p_side, float p_value) {
