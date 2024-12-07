@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #ifndef TEXT_SERVER_ADV_H
 #define TEXT_SERVER_ADV_H
 
@@ -160,9 +171,6 @@ class TextServerAdvanced : public TextServerExtension {
 
 	HashMap<StringName, int32_t> feature_sets;
 	HashMap<int32_t, FeatureInfo> feature_sets_inv;
-
-	SafeNumeric<TextServer::FontLCDSubpixelLayout> lcd_subpixel_layout{ TextServer::FontLCDSubpixelLayout::FONT_LCD_SUBPIXEL_LAYOUT_NONE };
-	void _update_settings();
 
 	void _insert_num_systems_lang();
 	void _insert_feature_sets();
@@ -316,6 +324,7 @@ class TextServerAdvanced : public TextServerExtension {
 		Mutex mutex;
 
 		TextServer::FontAntialiasing antialiasing = TextServer::FONT_ANTIALIASING_GRAY;
+		TextServer::FontLCDSubpixelLayout lcd_subpixel_layout = TextServer::FontLCDSubpixelLayout::FONT_LCD_SUBPIXEL_LAYOUT_NONE;
 		bool disable_embedded_bitmaps = true;
 		bool mipmaps = false;
 		bool msdf = false;
@@ -774,6 +783,9 @@ public:
 
 	MODBIND2(font_set_antialiasing, const RID &, TextServer::FontAntialiasing);
 	MODBIND1RC(TextServer::FontAntialiasing, font_get_antialiasing, const RID &);
+
+	MODBIND2(font_set_lcd_subpixel_layout, const RID &, TextServer::FontLCDSubpixelLayout);
+	MODBIND1RC(TextServer::FontLCDSubpixelLayout, font_get_lcd_subpixel_layout, const RID &);
 
 	MODBIND2(font_set_disable_embedded_bitmaps, const RID &, bool);
 	MODBIND1RC(bool, font_get_disable_embedded_bitmaps, const RID &);
