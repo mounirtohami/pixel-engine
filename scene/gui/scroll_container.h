@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #ifndef SCROLL_CONTAINER_H
 #define SCROLL_CONTAINER_H
 
@@ -73,6 +84,9 @@ private:
 	struct ThemeCache {
 		Ref<StyleBox> panel_style;
 		Ref<StyleBox> focus_style;
+
+		int h_separation = 0;
+		int v_separation = 0;
 	} theme_cache;
 
 	void _cancel_drag();
