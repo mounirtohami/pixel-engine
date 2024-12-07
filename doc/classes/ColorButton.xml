@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ColorButton" inherits="BaseButton" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+	<brief_description>
+		A customizable button that allows the user to select a color.
+	</brief_description>
+	<description>
+		A button that provides functionality to respond to color changes and right-click actions, making it useful for UI color pickers or palette tools.
+		By default, the button's [member BaseButton.toggle_mode] is set to [code]true[/code].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="set_color">
+			<return type="void" />
+			<param index="0" name="color" type="Color" />
+			<description>
+				Changes the button's color and emits [signal color_changed].
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="color" type="Color" setter="set_color_no_signal" getter="get_color" default="Color(1, 1, 1, 1)">
+			The color displayed by the button. Changing this value doesn't emit [signal color_changed], use [method set_color] instead.
+		</member>
+		<member name="flat" type="bool" setter="set_flat" getter="is_flat" default="false">
+			makes the Button flat ie. without drawing the theme styles.
+		</member>
+	</members>
+	<signals>
+		<signal name="color_changed">
+			<param index="0" name="color" type="Color" />
+			<description>
+				Emits when the button's color is changed programmatically using [method set_color].
+			</description>
+		</signal>
+	</signals>
+	<theme_items>
+		<theme_item name="bg" data_type="icon" type="Texture2D">
+			The background texture of the button ie. the checker pattern visible when the color's alpha is less than one.
+		</theme_item>
+		<theme_item name="overbright_indicator" data_type="icon" type="Texture2D">
+			The texture drawn on top of the button when using overbright color.
+		</theme_item>
+		<theme_item name="disabled" data_type="style" type="StyleBox">
+			The style applied when the button is disabled.
+		</theme_item>
+		<theme_item name="focus" data_type="style" type="StyleBox">
+			The style applied when the button has focus, ie. drawing a border over the current [StyleBox].
+		</theme_item>
+		<theme_item name="hover" data_type="style" type="StyleBox">
+			The style applied when the button is hovered over.
+		</theme_item>
+		<theme_item name="hover_pressed" data_type="style" type="StyleBox">
+			The style applied when the button is hovered while it's pressed or toggled on.
+		</theme_item>
+		<theme_item name="normal" data_type="style" type="StyleBox">
+			The default style for the button.
+		</theme_item>
+		<theme_item name="pressed" data_type="style" type="StyleBox">
+			The style applied when the button is pressed.
+		</theme_item>
+	</theme_items>
+</class>
