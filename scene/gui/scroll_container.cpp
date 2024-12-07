@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "scroll_container.h"
 
 #include "core/config/project_settings.h"
@@ -60,7 +71,7 @@ Size2 ScrollContainer::get_minimum_size() const {
 		min_size.x = largest_child_min_size.x;
 		bool v_scroll_show = vertical_scroll_mode == SCROLL_MODE_SHOW_ALWAYS || vertical_scroll_mode == SCROLL_MODE_RESERVE || (vertical_scroll_mode == SCROLL_MODE_AUTO && largest_child_min_size.y > size.y);
 		if (v_scroll_show && v_scroll->get_parent() == this) {
-			min_size.x += v_scroll->get_minimum_size().x;
+			min_size.x += v_scroll->get_minimum_size().x + theme_cache.h_separation;
 		}
 	}
 
@@ -68,7 +79,7 @@ Size2 ScrollContainer::get_minimum_size() const {
 		min_size.y = largest_child_min_size.y;
 		bool h_scroll_show = horizontal_scroll_mode == SCROLL_MODE_SHOW_ALWAYS || horizontal_scroll_mode == SCROLL_MODE_RESERVE || (horizontal_scroll_mode == SCROLL_MODE_AUTO && largest_child_min_size.x > size.x);
 		if (h_scroll_show && h_scroll->get_parent() == this) {
-			min_size.y += h_scroll->get_minimum_size().y;
+			min_size.y += h_scroll->get_minimum_size().y + theme_cache.v_separation;
 		}
 	}
 
@@ -294,8 +305,8 @@ void ScrollContainer::ensure_control_visible(Control *p_control) {
 
 	Rect2 global_rect = get_global_rect();
 	Rect2 other_rect = p_control->get_global_rect();
-	float side_margin = v_scroll->is_visible() ? v_scroll->get_size().x : 0.0f;
-	float bottom_margin = h_scroll->is_visible() ? h_scroll->get_size().y : 0.0f;
+	float side_margin = v_scroll->is_visible() ? v_scroll->get_size().x + theme_cache.h_separation : 0.0f;
+	float bottom_margin = h_scroll->is_visible() ? h_scroll->get_size().y + theme_cache.v_separation : 0.0f;
 
 	Vector2 diff = Vector2(MAX(MIN(other_rect.position.x - (is_layout_rtl() ? side_margin : 0.0f), global_rect.position.x), other_rect.position.x + other_rect.size.x - global_rect.size.x + (!is_layout_rtl() ? side_margin : 0.0f)),
 			MAX(MIN(other_rect.position.y, global_rect.position.y), other_rect.position.y + other_rect.size.y - global_rect.size.y + bottom_margin));
@@ -314,11 +325,11 @@ void ScrollContainer::_reposition_children() {
 	bool rtl = is_layout_rtl();
 
 	if (_is_h_scroll_visible() || horizontal_scroll_mode == SCROLL_MODE_RESERVE) {
-		size.y -= h_scroll->get_minimum_size().y;
+		size.y -= theme_cache.v_separation + h_scroll->get_minimum_size().y;
 	}
 
 	if (_is_v_scroll_visible() || vertical_scroll_mode == SCROLL_MODE_RESERVE) {
-		size.x -= v_scroll->get_minimum_size().x;
+		size.x -= theme_cache.h_separation + v_scroll->get_minimum_size().x;
 	}
 
 	for (int i = 0; i < get_child_count(); i++) {
@@ -340,7 +351,7 @@ void ScrollContainer::_reposition_children() {
 		}
 		r.position += ofs;
 		if (rtl && _is_v_scroll_visible()) {
-			r.position.x += v_scroll->get_minimum_size().x;
+			r.position.x += theme_cache.h_separation + v_scroll->get_minimum_size().x;
 		}
 		r.position = r.position.floor();
 		fit_child_in_rect(c, r);
@@ -643,6 +654,9 @@ void ScrollContainer::_bind_methods() {
 
 	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, ScrollContainer, panel_style, "panel");
 	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, ScrollContainer, focus_style, "focus");
+
+	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_CONSTANT, ScrollContainer, h_separation, "v_scroll_bar_separation");
+	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_CONSTANT, ScrollContainer, v_separation, "h_scroll_bar_separation");
 
 	GLOBAL_DEF("gui/common/default_scroll_deadzone", 0);
 }
