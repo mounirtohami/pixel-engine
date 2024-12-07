@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "texture_button.h"
 
 #include "core/typedefs.h"
@@ -56,7 +67,7 @@ Size2 TextureButton::get_minimum_size() const {
 		}
 	}
 
-	return rscale.abs();
+	return _get_final_minimum_size(rscale.abs());
 }
 
 bool TextureButton::has_point(const Point2 &p_point) const {

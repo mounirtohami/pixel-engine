@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "link_button.h"
 
 #include "scene/theme/theme_db.h"
@@ -142,7 +153,7 @@ void LinkButton::pressed() {
 }
 
 Size2 LinkButton::get_minimum_size() const {
-	return text_buf->get_size();
+	return _get_final_minimum_size(text_buf->get_size());
 }
 
 void LinkButton::_notification(int p_what) {
