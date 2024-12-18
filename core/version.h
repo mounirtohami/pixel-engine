@@ -48,6 +48,7 @@
 // Defines the main "branch" version. Patch versions in this branch should be
 // forward-compatible.
 // Example: "3.1"
+#define PIXEL_VERSION _MKSTR(PIXEL_MAJOR) "." _MKSTR(PIXEL_MINOR) "." _MKSTR(PIXEL_PATCH)
 #define VERSION_BRANCH _MKSTR(VERSION_MAJOR) "." _MKSTR(VERSION_MINOR)
 #if VERSION_PATCH
 // Example: "3.1.4"

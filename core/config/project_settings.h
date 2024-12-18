@@ -45,7 +45,9 @@ class ProjectSettings : public Object {
 
 public:
 	typedef HashMap<String, Variant> CustomMap;
+#ifndef PIXEL_ENGINE
 	static const String PROJECT_DATA_DIR_NAME_SUFFIX;
+#endif // !PIXEL_ENGINE
 
 	enum {
 		// Properties that are not for built in values begin from this value, so builtin ones are displayed first.

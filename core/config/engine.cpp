@@ -128,6 +128,9 @@ Dictionary Engine::get_version_info() const {
 	dict["major"] = VERSION_MAJOR;
 	dict["minor"] = VERSION_MINOR;
 	dict["patch"] = VERSION_PATCH;
+	dict["pixel_major"] = PIXEL_MAJOR;
+	dict["pixel_minor"] = PIXEL_MINOR;
+	dict["pixel_patch"] = PIXEL_PATCH;
 	dict["hex"] = VERSION_HEX;
 	dict["status"] = VERSION_STATUS;
 	dict["build"] = VERSION_BUILD;

@@ -180,6 +180,7 @@ void OS_Web::vibrate_handheld(int p_duration_ms, float p_amplitude) {
 
 String OS_Web::get_user_data_dir() const {
 	String userfs = "/userfs";
+#ifndef PIXEL_ENGINE
 	String appname = get_safe_dir_name(GLOBAL_GET("application/config/name"));
 	if (!appname.is_empty()) {
 		bool use_custom_dir = GLOBAL_GET("application/config/use_custom_user_dir");
@@ -195,6 +196,9 @@ String OS_Web::get_user_data_dir() const {
 	}
 
 	return userfs.path_join(get_godot_dir_name()).path_join("app_userdata").path_join("[unnamed project]");
+#else
+	return userfs.path_join(get_godot_dir_name());
+#endif // !PIXEL_ENGINE
 }
 
 String OS_Web::get_cache_path() const {

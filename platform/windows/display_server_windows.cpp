@@ -707,6 +707,7 @@ Error DisplayServerWindows::_file_dialog_with_options_show(const String &p_title
 	if (!windows.has(window_id)) {
 		window_id = MAIN_WINDOW_ID;
 	}
+#ifndef PIXEL_ENGINE
 	String appname;
 	if (Engine::get_singleton()->is_editor_hint()) {
 		appname = "Godot.GodotEditor." + String(VERSION_BRANCH);
@@ -725,6 +726,9 @@ Error DisplayServerWindows::_file_dialog_with_options_show(const String &p_title
 		clean_app_name = clean_app_name.substr(0, 120 - version.length()).trim_suffix(".");
 		appname = "Godot." + clean_app_name + "." + version;
 	}
+#else
+	String appname = "PixelEngineV" + String(PIXEL_VERSION);
+#endif // !PIXEL_ENGINE
 
 	FileDialogData *fd = memnew(FileDialogData);
 	if (window_id != INVALID_WINDOW_ID) {
@@ -5938,6 +5942,7 @@ DisplayServer::WindowID DisplayServerWindows::_create_window(WindowMode p_mode, 
 		HRESULT hr = SHGetPropertyStoreForWindow(wd.hWnd, IID_IPropertyStore, (void **)&prop_store);
 		if (hr == S_OK) {
 			PROPVARIANT val;
+#ifndef PIXEL_ENGINE
 			String appname;
 			if (Engine::get_singleton()->is_editor_hint()) {
 				appname = "Godot.GodotEditor." + String(VERSION_FULL_CONFIG);
@@ -5956,6 +5961,9 @@ DisplayServer::WindowID DisplayServerWindows::_create_window(WindowMode p_mode, 
 				clean_app_name = clean_app_name.substr(0, 120 - version.length()).trim_suffix(".");
 				appname = "Godot." + clean_app_name + "." + version;
 			}
+#else
+			String appname = "PixelEngineV" + String(PIXEL_VERSION);
+#endif // !PIXEL_ENGINE
 			InitPropVariantFromString((PCWSTR)appname.utf16().get_data(), &val);
 			prop_store->SetValue(PKEY_AppUserModel_ID, val);
 			prop_store->Release();
@@ -6506,9 +6514,11 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 	}
 #endif
 	String appname;
+	String name;
 	if (Engine::get_singleton()->is_editor_hint()) {
 		appname = "Godot.GodotEditor." + String(VERSION_FULL_CONFIG);
 	} else {
+#ifndef PIXEL_ENGINE
 		String name = GLOBAL_GET("application/config/name");
 		String version = GLOBAL_GET("application/config/version");
 		if (version.is_empty()) {
@@ -6522,6 +6532,10 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 		}
 		clean_app_name = clean_app_name.substr(0, 120 - version.length()).trim_suffix(".");
 		appname = "Godot." + clean_app_name + "." + version;
+#else
+		appname = "PixelEngineV" + String(PIXEL_VERSION);
+		name = "Pixel Engine";
+#endif // !PIXEL_ENGINE
 
 #ifndef TOOLS_ENABLED
 		// Set for exported projects only.
@@ -6532,7 +6546,7 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 			RegSetValueExW(key, (LPCWSTR)value_name.utf16().get_data(), 0, REG_SZ, (const BYTE *)cs_name.get_data(), cs_name.size() * sizeof(WCHAR));
 			RegCloseKey(key);
 		}
-#endif
+#endif // !TOOLS_ENABLED
 	}
 	SetCurrentProcessExplicitAppUserModelID((PCWSTR)appname.utf16().get_data());
 

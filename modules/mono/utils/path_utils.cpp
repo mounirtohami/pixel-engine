@@ -237,7 +237,11 @@ const Vector<String> reserved_assembly_names = { "GodotSharp", "GodotSharpEditor
 String get_csharp_project_name() {
 	String name = GLOBAL_GET("dotnet/project/assembly_name");
 	if (name.is_empty()) {
+#ifndef PIXEL_ENGINE
 		name = GLOBAL_GET("application/config/name");
+#else
+		name = "Pixel Engine";
+#endif // !PIXEL_ENGINE
 		Vector<String> invalid_chars = Vector<String>({ //
 				// Windows reserved filename chars.
 				":", "*", "?", "\"", "<", ">", "|",

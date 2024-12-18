@@ -64,12 +64,16 @@ String DisplayServerWayland::_get_app_id_from_context(Context p_context) {
 
 		case CONTEXT_ENGINE:
 		default: {
+#ifndef PIXEL_ENGINE
 			String config_name = GLOBAL_GET("application/config/name");
 			if (config_name.length() != 0) {
 				app_id = config_name;
 			} else {
 				app_id = "org.godotengine.Godot";
 			}
+#else
+			app_id = "Pixel Engine";
+#endif // !PIXEL_ENGINE
 		}
 	}
 

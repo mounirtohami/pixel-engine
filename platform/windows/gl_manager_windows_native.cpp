@@ -171,7 +171,11 @@ void GLManagerNative_Windows::_nvapi_setup_profile() {
 	}
 
 	String app_executable_name = OS::get_singleton()->get_executable_path().get_file();
+#ifndef PIXEL_ENGINE
 	String app_profile_name = GLOBAL_GET("application/config/name");
+#else
+	String app_profile_name = "Pixel Engine";
+#endif // !PIXEL_ENGINE
 	// We need a name anyways, so let's use the engine name if an application name is not available
 	// (this is used mostly by the Project Manager)
 	if (app_profile_name.is_empty()) {

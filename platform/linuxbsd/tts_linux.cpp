@@ -56,6 +56,7 @@ void TTS_Linux::speech_init_thread_func(void *p_userdata) {
 #else
 		{
 #endif
+#ifndef PIXEL_ENGINE
 			CharString class_str;
 			String config_name = GLOBAL_GET("application/config/name");
 			if (config_name.length() == 0) {
@@ -64,6 +65,10 @@ void TTS_Linux::speech_init_thread_func(void *p_userdata) {
 				class_str = config_name.utf8();
 			}
 			tts->synth = spd_open(class_str, "Godot_Engine_Speech_API", "Godot_Engine", SPD_MODE_THREADED);
+#else
+		CharString class_str = "Pixel_Engine";
+			tts->synth = spd_open(class_str, "Pixel_Engine_Speech_API", "Pixel_Engine", SPD_MODE_THREADED);
+#endif // !PIXEL_ENGINE
 			if (tts->synth) {
 				tts->synth->callback_end = &speech_event_callback;
 				tts->synth->callback_cancel = &speech_event_callback;

@@ -960,6 +960,7 @@ void OS_Unix::unset_environment(const String &p_var) const {
 }
 
 String OS_Unix::get_user_data_dir() const {
+#ifndef PIXEL_ENGINE
 	String appname = get_safe_dir_name(GLOBAL_GET("application/config/name"));
 	if (!appname.is_empty()) {
 		bool use_custom_dir = GLOBAL_GET("application/config/use_custom_user_dir");
@@ -973,8 +974,10 @@ String OS_Unix::get_user_data_dir() const {
 			return get_data_path().path_join(get_godot_dir_name()).path_join("app_userdata").path_join(appname);
 		}
 	}
-
 	return get_data_path().path_join(get_godot_dir_name()).path_join("app_userdata").path_join("[unnamed project]");
+#else
+	return get_data_path().path_join(get_godot_dir_name());
+#endif // !PIXEL_ENGINE
 }
 
 String OS_Unix::get_executable_path() const {

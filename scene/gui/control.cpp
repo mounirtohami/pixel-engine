@@ -449,9 +449,11 @@ void Control::_validate_property(PropertyInfo &p_property) const {
 		// Only the default theme and the project theme are used for the list of options.
 		// This is an imposed limitation to simplify the logic needed to leverage those options.
 		ThemeDB::get_singleton()->get_default_theme()->get_type_variation_list(get_class_name(), &names);
+#ifndef PIXEL_ENGINE
 		if (ThemeDB::get_singleton()->get_project_theme().is_valid()) {
 			ThemeDB::get_singleton()->get_project_theme()->get_type_variation_list(get_class_name(), &names);
 		}
+#endif // !PIXEL_ENGINE
 		names.sort_custom<StringName::AlphCompare>();
 
 		Vector<StringName> unique_names;
@@ -3061,6 +3063,7 @@ bool Control::is_layout_rtl() const {
 	if (data.is_rtl_dirty) {
 		data.is_rtl_dirty = false;
 		if (data.layout_dir == LAYOUT_DIRECTION_INHERITED) {
+#ifndef PIXEL_ENGINE
 #ifdef TOOLS_ENABLED
 			if (is_part_of_edited_scene() && GLOBAL_GET(SNAME("internationalization/rendering/force_right_to_left_layout_direction"))) {
 				data.is_rtl = true;
@@ -3090,6 +3093,7 @@ bool Control::is_layout_rtl() const {
 				return data.is_rtl;
 			}
 #endif // TOOLS_ENABLED
+#endif // !PIXEL_ENGINE
 			Node *parent_node = get_parent();
 			while (parent_node) {
 				Control *parent_control = Object::cast_to<Control>(parent_node);
@@ -3118,19 +3122,27 @@ bool Control::is_layout_rtl() const {
 				data.is_rtl = TS->is_locale_right_to_left(locale);
 			}
 		} else if (data.layout_dir == LAYOUT_DIRECTION_APPLICATION_LOCALE) {
+#ifndef PIXEL_ENGINE
 			if (GLOBAL_GET(SNAME("internationalization/rendering/force_right_to_left_layout_direction"))) {
 				data.is_rtl = true;
 			} else {
+#endif // !PIXEL_ENGINE
 				String locale = TranslationServer::get_singleton()->get_tool_locale();
 				data.is_rtl = TS->is_locale_right_to_left(locale);
+#ifndef PIXEL_ENGINE
 			}
+#endif // !PIXEL_ENGINE
 		} else if (data.layout_dir == LAYOUT_DIRECTION_SYSTEM_LOCALE) {
+#ifndef PIXEL_ENGINE
 			if (GLOBAL_GET(SNAME("internationalization/rendering/force_right_to_left_layout_direction"))) {
 				const_cast<Control *>(this)->data.is_rtl = true;
 			} else {
+#endif // !PIXEL_ENGINE
 				String locale = OS::get_singleton()->get_locale();
 				const_cast<Control *>(this)->data.is_rtl = TS->is_locale_right_to_left(locale);
+#ifndef PIXEL_ENGINE
 			}
+#endif // !PIXEL_ENGINE
 		} else {
 			data.is_rtl = (data.layout_dir == LAYOUT_DIRECTION_RTL);
 		}

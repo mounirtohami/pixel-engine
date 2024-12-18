@@ -69,6 +69,7 @@
 #include "main/performance.h"
 #include "main/splash.gen.h"
 #include "modules/register_module_types.h"
+#include "pixel/main_tree.h"
 #include "platform/register_platform_apis.h"
 #include "scene/main/scene_tree.h"
 #include "scene/main/window.h"
@@ -208,6 +209,7 @@ static int audio_driver_idx = -1;
 static bool single_window = false;
 static bool editor = false;
 static bool project_manager = false;
+static bool pixel_engine = false;
 static bool cmdline_tool = false;
 static String locale;
 static String log_file;
@@ -1032,7 +1034,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	String audio_driver = "";
 	String project_path = ".";
+#ifndef PIXEL_ENGINE
 	bool upwards = false;
+#endif // !PIXEL_ENGINE
 	String debug_uri = "";
 	bool skip_breakpoints = false;
 	String main_pack;
@@ -1626,8 +1630,10 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 				OS::get_singleton()->print("Missing relative or absolute path, aborting.\n");
 				goto error;
 			}
+#ifndef PIXEL_ENGINE
 		} else if (arg == "-u" || arg == "--upwards") { // scan folders upwards
 			upwards = true;
+#endif // !PIXEL_ENGINE
 		} else if (arg == "--quit") { // Auto quit at the end of the first main loop iteration
 			quit_after = 1;
 		} else if (arg == "--quit-after") { // Quit after the given number of iterations
@@ -1876,6 +1882,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		}
 	}
 
+#ifndef PIXEL_ENGINE
 	OS::get_singleton()->_in_editor = editor;
 	if (globals->setup(project_path, main_pack, upwards, editor) == OK) {
 #ifdef TOOLS_ENABLED
@@ -1890,13 +1897,19 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		OS::get_singleton()->alert(error_msg);
 
 		goto error;
-#endif
+#endif // TOOLS_ENABLED
 	}
+#else
+	if (FileAccess::exists(OS::get_singleton()->get_user_data_dir().path_join("settings.pixel"))) {
+		globals->setup(OS::get_singleton()->get_user_data_dir(), "");
+	}
+	pixel_engine = true;
+#endif
 
 	// Initialize WorkerThreadPool.
 	{
 #ifdef THREADS_ENABLED
-		if (editor || project_manager) {
+		if (editor || project_manager || pixel_engine) {
 			WorkerThreadPool::get_singleton()->init(-1, 0.75);
 		} else {
 			int worker_threads = GLOBAL_GET("threading/worker_pool/max_threads");
@@ -1943,7 +1956,11 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	// Initialize user data dir.
 	OS::get_singleton()->ensure_user_data_dir();
 
+#ifndef PIXEL_ENGINE
 	OS::get_singleton()->set_low_processor_usage_mode(GLOBAL_DEF("application/run/low_processor_mode", false));
+#else
+	OS::get_singleton()->set_low_processor_usage_mode(GLOBAL_DEF("application/run/low_processor_mode", true));
+#endif // !PIXEL_ENGINE
 	OS::get_singleton()->set_low_processor_usage_mode_sleep_usec(
 			GLOBAL_DEF(PropertyInfo(Variant::INT, "application/run/low_processor_mode_sleep_usec", PROPERTY_HINT_RANGE, "0,33200,1,or_greater"), 6900)); // Roughly 144 FPS
 
@@ -1994,7 +2011,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	// This also prevents logs from being created for the editor instance, as feature tags
 	// are disabled while in the editor (even if they should logically apply).
 	GLOBAL_DEF("debug/file_logging/enable_file_logging.pc", true);
-	GLOBAL_DEF("debug/file_logging/log_path", "user://logs/godot.log");
+	GLOBAL_DEF("debug/file_logging/log_path", "user://logs/pixel.log");
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "debug/file_logging/max_log_files", PROPERTY_HINT_RANGE, "0,20,1,or_greater"), 5);
 
 	// If `--log-file` is used to override the log path, allow creating logs for the project manager or editor
@@ -2018,7 +2035,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		OS::get_singleton()->add_logger(memnew(RotatedFileLogger(base_path, max_files)));
 	}
 
-	if (main_args.size() == 0 && String(GLOBAL_GET("application/run/main_scene")) == "") {
+#ifndef PIXEL_ENGINE
+	if (!pixel_engine && main_args.size() == 0 && String(GLOBAL_GET("application/run/main_scene")) == "") {
 #ifdef TOOLS_ENABLED
 		if (!editor && !project_manager) {
 #endif // TOOLS_ENABLED
@@ -2030,9 +2048,10 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		}
 #endif // TOOLS_ENABLED
 	}
+#endif // !PIXEL_ENGINE
 
-	if (editor || project_manager) {
-		Engine::get_singleton()->set_editor_hint(true);
+	if (editor || project_manager || pixel_engine) {
+		Engine::get_singleton()->set_editor_hint(!pixel_engine);
 		use_custom_res = false;
 		input_map->load_default(); //keys for editor
 	} else {
@@ -3616,8 +3635,9 @@ int Main::start() {
 #endif // TOOLS_ENABLED
 
 	main_timer_sync.init(OS::get_singleton()->get_ticks_usec());
-	List<String> args = OS::get_singleton()->get_cmdline_args();
 
+#ifndef PIXEL_ENGINE
+	List<String> args = OS::get_singleton()->get_cmdline_args();
 	for (List<String>::Element *E = args.front(); E; E = E->next()) {
 		// First check parameters that do not have an argument to the right.
 
@@ -3722,6 +3742,7 @@ int Main::start() {
 		}
 #endif
 	}
+#endif // !PIXEL_ENGINE
 
 	uint64_t minimum_time_msec = GLOBAL_DEF(PropertyInfo(Variant::INT, "application/boot_splash/minimum_display_time", PROPERTY_HINT_RANGE, "0,100,1,or_greater,suffix:ms"), 0);
 	if (Engine::get_singleton()->is_editor_hint()) {
@@ -3864,9 +3885,11 @@ int Main::start() {
 
 #endif // TOOLS_ENABLED
 
+#ifndef PIXEL_ENGINE
 	if (script.is_empty() && game_path.is_empty() && String(GLOBAL_GET("application/run/main_scene")) != "") {
 		game_path = GLOBAL_GET("application/run/main_scene");
 	}
+#endif // !PIXEL_ENGINE
 
 #ifdef TOOLS_ENABLED
 	if (!editor && !project_manager && !cmdline_tool && script.is_empty() && game_path.is_empty()) {
@@ -3879,13 +3902,21 @@ int Main::start() {
 	}
 #endif
 
+#ifdef PIXEL_ENGINE
+	pixel_engine = true;
+#endif
+
 	MainLoop *main_loop = nullptr;
 	if (editor) {
 		main_loop = memnew(SceneTree);
+	} else if (pixel_engine) {
+		main_loop = memnew(MainTree);
 	}
+#ifndef PIXEL_ENGINE
 	if (main_loop_type.is_empty()) {
 		main_loop_type = GLOBAL_GET("application/run/main_loop_type");
 	}
+#endif // !PIXEL_ENGINE
 
 	if (!script.is_empty()) {
 		Ref<Script> script_res = ResourceLoader::load(script);
@@ -3990,7 +4021,11 @@ int Main::start() {
 			sml->set_disable_node_threading(true);
 		}
 
+#ifndef PIXEL_ENGINE
 		bool embed_subwindows = GLOBAL_GET("display/window/subwindows/embed_subwindows");
+#else
+		bool embed_subwindows = false;
+#endif // !PIXEL_ENGINE
 
 		if (single_window || (!project_manager && !editor && embed_subwindows) || !DisplayServer::get_singleton()->has_feature(DisplayServer::Feature::FEATURE_SUBWINDOWS)) {
 			sml->get_root()->set_embedding_subwindows(true);
@@ -3999,7 +4034,7 @@ int Main::start() {
 		ResourceLoader::add_custom_loaders();
 		ResourceSaver::add_custom_savers();
 
-		if (!project_manager && !editor) { // game
+		if (!project_manager && !editor && !pixel_engine) { // game
 			if (!game_path.is_empty() || !script.is_empty()) {
 				//autoload
 				OS::get_singleton()->benchmark_begin_measure("Startup", "Load Autoloads");
@@ -4122,8 +4157,10 @@ int Main::start() {
 			OS::get_singleton()->benchmark_end_measure("Startup", "Editor");
 		}
 #endif
+#ifndef PIXEL_ENGINE
 		sml->set_auto_accept_quit(GLOBAL_GET("application/config/auto_accept_quit"));
 		sml->set_quit_on_go_back(GLOBAL_GET("application/config/quit_on_go_back"));
+#endif // !PIXEL_ENGINE
 
 		if (!editor && !project_manager) {
 			//standard helpers that can be changed from main config
@@ -4164,9 +4201,13 @@ int Main::start() {
 			sml->get_root()->set_content_scale_size(stretch_size);
 			sml->get_root()->set_content_scale_factor(stretch_scale);
 
+#ifndef PIXEL_ENGINE
 			sml->set_auto_accept_quit(GLOBAL_GET("application/config/auto_accept_quit"));
 			sml->set_quit_on_go_back(GLOBAL_GET("application/config/quit_on_go_back"));
 			String appname = GLOBAL_GET("application/config/name");
+#else
+			String appname = "Pixel Engine";
+#endif // !PIXEL_ENGINE
 			appname = TranslationServer::get_singleton()->translate(appname);
 #ifdef DEBUG_ENABLED
 			// Append a suffix to the window title to denote that the project is running
@@ -4251,7 +4292,7 @@ int Main::start() {
 			}
 #endif
 		}
-
+#ifndef PIXEL_ENGINE
 		if (!project_manager && !editor) { // game
 
 			OS::get_singleton()->benchmark_begin_measure("Startup", "Load Game");
@@ -4298,6 +4339,7 @@ int Main::start() {
 
 			OS::get_singleton()->benchmark_end_measure("Startup", "Load Game");
 		}
+#endif // !PIXEL_ENGINE
 
 #ifdef TOOLS_ENABLED
 		if (project_manager) {

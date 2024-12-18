@@ -70,9 +70,11 @@
 #include "scene/gui/file_dialog.h"
 #include "scene/gui/flow_container.h"
 #include "scene/gui/foldable_container.h"
-#include "scene/gui/graph_edit.h"
-#include "scene/gui/graph_frame.h"
-#include "scene/gui/graph_node.h"
+#ifndef PIXEL_ENGINE
+#include "scene/gui/graph/graph_edit.h"
+#include "scene/gui/graph/graph_frame.h"
+#include "scene/gui/graph/graph_node.h"
+#endif // !PIXEL_ENGINE
 #include "scene/gui/grid_container.h"
 #include "scene/gui/item_list.h"
 #include "scene/gui/label.h"
@@ -506,10 +508,12 @@ void register_scene_types() {
 	GDREGISTER_CLASS(HSplitContainer);
 	GDREGISTER_CLASS(VSplitContainer);
 
+#ifndef PIXEL_ENGINE
 	GDREGISTER_CLASS(GraphElement);
 	GDREGISTER_CLASS(GraphNode);
 	GDREGISTER_CLASS(GraphFrame);
 	GDREGISTER_CLASS(GraphEdit);
+#endif // !PIXEL_ENGINE
 
 	OS::get_singleton()->yield(); // may take time to init
 
@@ -520,9 +524,11 @@ void register_scene_types() {
 	AcceptDialog::set_swap_cancel_ok(swap_cancel_ok);
 #endif // !ADVANCED_GUI_DISABLED
 
+#ifndef PIXEL_ENGINE
 	int root_dir = GLOBAL_GET("internationalization/rendering/root_node_layout_direction");
 	Control::set_root_layout_direction(root_dir);
 	Window::set_root_layout_direction(root_dir);
+#endif // PIXEL_ENGINE
 
 	/* REGISTER ANIMATION */
 	GDREGISTER_CLASS(Tween);
@@ -1294,7 +1300,9 @@ void register_scene_types() {
 	if (RenderingServer::get_singleton()) {
 		// RenderingServer needs to exist for this to succeed.
 		ColorPicker::init_shaders();
+#ifndef PIXEL_ENGINE
 		GraphEdit::init_shaders();
+#endif // !PIXEL_ENGINE
 	}
 
 	SceneDebugger::initialize();
@@ -1346,7 +1354,9 @@ void unregister_scene_types() {
 	ParticleProcessMaterial::finish_shaders();
 	CanvasItemMaterial::finish_shaders();
 	ColorPicker::finish_shaders();
+#ifndef PIXEL_ENGINE
 	GraphEdit::finish_shaders();
+#endif // !PIXEL_ENGINE
 	SceneStringNames::free();
 
 	OS::get_singleton()->benchmark_end_measure("Scene", "Unregister Types");
