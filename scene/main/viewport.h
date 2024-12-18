@@ -261,6 +261,9 @@ private:
 
 	Rect2 last_vp_rect;
 
+#ifdef PIXEL_ENGINE
+	Color clear_color = Color(0.0, 0.0, 0.0);
+#endif // PIXEL_ENGINE
 	bool transparent_bg = false;
 	bool use_hdr_2d = false;
 	bool gen_mipmaps = false;
@@ -531,6 +534,11 @@ public:
 	virtual Transform2D get_final_transform() const;
 
 	void gui_set_root_order_dirty();
+
+#ifdef PIXEL_ENGINE
+	void set_clear_color(const Color &p_color);
+	Color get_clear_color() const;
+#endif // PIXEL_ENGINE
 
 	void set_transparent_background(bool p_enable);
 	bool has_transparent_background() const;

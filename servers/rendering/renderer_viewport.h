@@ -119,6 +119,9 @@ public:
 		RS::CanvasItemTextureFilter texture_filter = RS::CANVAS_ITEM_TEXTURE_FILTER_LINEAR;
 		RS::CanvasItemTextureRepeat texture_repeat = RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED;
 
+#ifdef PIXEL_ENGINE
+		Color clear_color = Color(0.0, 0.0, 0.0, 1.0);
+#endif // PIXEL_ENGINE
 		bool transparent_bg = false;
 		bool use_hdr_2d = false;
 
@@ -161,6 +164,9 @@ public:
 			view_count = 1;
 			update_mode = RS::VIEWPORT_UPDATE_WHEN_VISIBLE;
 			clear_mode = RS::VIEWPORT_CLEAR_ALWAYS;
+#ifdef PIXEL_ENGINE
+			clear_color = Color(0.0, 0.0, 0.0, 1.0);
+#endif // PIXEL_ENGINE
 			transparent_bg = false;
 			use_hdr_2d = false;
 
@@ -260,6 +266,9 @@ public:
 	void viewport_attach_canvas(RID p_viewport, RID p_canvas);
 	void viewport_remove_canvas(RID p_viewport, RID p_canvas);
 	void viewport_set_canvas_transform(RID p_viewport, RID p_canvas, const Transform2D &p_offset);
+#ifdef PIXEL_ENGINE
+	void viewport_set_clear_color(RID p_viewport, const Color &p_color);
+#endif // PIXEL_ENGINE
 	void viewport_set_transparent_background(RID p_viewport, bool p_enabled);
 	void viewport_set_use_hdr_2d(RID p_viewport, bool p_use_hdr_2d);
 

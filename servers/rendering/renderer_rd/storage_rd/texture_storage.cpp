@@ -3525,6 +3525,18 @@ RID TextureStorage::render_target_get_override_velocity_slice(RID p_render_targe
 	}
 }
 
+#ifdef PIXEL_ENGINE
+void TextureStorage::render_target_set_clear_color(RID p_render_target, const Color &p_color) {
+	RenderTarget *rt = render_target_owner.get_or_null(p_render_target);
+	ERR_FAIL_NULL(rt);
+	rt->clear_color = p_color;
+	if (rt->overridden.color.is_null() && !rt->is_transparent) {
+		_clear_render_target(rt);
+		_update_render_target(rt);
+	}
+}
+#endif // PIXEL_ENGINE
+
 void TextureStorage::render_target_set_transparent(RID p_render_target, bool p_is_transparent) {
 	RenderTarget *rt = render_target_owner.get_or_null(p_render_target);
 	ERR_FAIL_NULL(rt);

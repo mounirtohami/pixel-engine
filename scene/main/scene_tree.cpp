@@ -1891,6 +1891,10 @@ SceneTree::SceneTree() {
 
 	const bool transparent_background = GLOBAL_DEF("rendering/viewport/transparent_background", false);
 	root->set_transparent_background(transparent_background);
+#ifdef PIXEL_ENGINE
+	const Color clear_color = GLOBAL_GET("rendering/viewport/default_clear_color");
+	root->set_clear_color(clear_color);
+#endif // PIXEL_ENGINE
 
 	const bool use_hdr_2d = GLOBAL_DEF_RST_BASIC("rendering/viewport/hdr_2d", false);
 	root->set_use_hdr_2d(use_hdr_2d);

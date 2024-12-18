@@ -711,6 +711,9 @@ public:
 
 	FUNC2(viewport_remove_canvas, RID, RID)
 	FUNC3(viewport_set_canvas_transform, RID, RID, const Transform2D &)
+#ifdef PIXEL_ENGINE
+	FUNC2(viewport_set_clear_color, RID, const Color &)
+#endif // PIXEL_ENGINE
 	FUNC2(viewport_set_transparent_background, RID, bool)
 	FUNC2(viewport_set_use_hdr_2d, RID, bool)
 	FUNC1RC(bool, viewport_is_using_hdr_2d, RID)
