@@ -3204,7 +3204,11 @@ Error Main::setup2(bool p_show_boot_logo) {
 			DisplayServer::get_singleton()->window_set_flag(DisplayServer::WINDOW_FLAG_ALWAYS_ON_TOP, true);
 		}
 
+#ifndef PIXEL_ENGINE
 		Color clear = GLOBAL_DEF_BASIC("rendering/environment/defaults/default_clear_color", Color(0.3, 0.3, 0.3));
+#else
+		Color clear = GLOBAL_DEF_BASIC("rendering/viewport/default_clear_color", Color(0.3, 0.3, 0.3));
+#endif // !PIXEL_ENGINE
 		RenderingServer::get_singleton()->set_default_clear_color(clear);
 
 		if (p_show_boot_logo) {
@@ -3523,8 +3527,13 @@ void Main::setup_boot_logo() {
 		}
 #endif
 	}
+#ifndef PIXEL_ENGINE
 	RenderingServer::get_singleton()->set_default_clear_color(
 			GLOBAL_GET("rendering/environment/defaults/default_clear_color"));
+#else
+	RenderingServer::get_singleton()->set_default_clear_color(
+			GLOBAL_GET("rendering/viewport/default_clear_color"));
+#endif // !PIXEL_ENGINE
 }
 
 String Main::get_rendering_driver_name() {
