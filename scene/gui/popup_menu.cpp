@@ -35,9 +35,10 @@
 #include "core/input/input.h"
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
-#include "core/string/print_string.h"
-#include "core/string/translation.h"
 #include "scene/gui/menu_bar.h"
+#include "scene/gui/scroll_bar.h"
+#include "scene/gui/scroll_container.h"
+#include "scene/main/timer.h"
 #include "scene/theme/theme_db.h"
 
 HashMap<NativeMenu::SystemMenus, PopupMenu *> PopupMenu::system_menus;

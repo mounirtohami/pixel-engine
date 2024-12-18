@@ -41,6 +41,7 @@
 #include "scene/main/timer.h"
 
 class MenuButton;
+class TextureButton;
 
 class GotoLineDialog : public ConfirmationDialog {
 	GDCLASS(GotoLineDialog, ConfirmationDialog);

@@ -48,7 +48,7 @@
 #include "scene/gui/separator.h"
 #include "scene/gui/texture_rect.h"
 #include "scene/property_utils.h"
-#include "scene/resources/3d/capsule_shape_3d.h"
+#include "scene/resources/3d/physics/capsule_shape_3d.h"
 #include "scene/resources/skeleton_profile.h"
 #include "scene/resources/surface_tool.h"
 

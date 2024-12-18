@@ -34,7 +34,7 @@
 #include "core/templates/vset.h"
 #include "scene/2d/physics/collision_object_2d.h"
 #include "scene/2d/physics/kinematic_collision_2d.h"
-#include "scene/resources/physics_material.h"
+#include "scene/resources/3d/physics/physics_material.h"
 #include "servers/physics_server_2d.h"
 
 class PhysicsBody2D : public CollisionObject2D {

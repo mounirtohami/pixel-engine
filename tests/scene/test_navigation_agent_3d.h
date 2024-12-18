@@ -31,7 +31,7 @@
 #ifndef TEST_NAVIGATION_AGENT_3D_H
 #define TEST_NAVIGATION_AGENT_3D_H
 
-#include "scene/3d/navigation_agent_3d.h"
+#include "scene/3d/navigation/navigation_agent_3d.h"
 #include "scene/3d/node_3d.h"
 #include "scene/main/window.h"
 

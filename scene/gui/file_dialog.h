@@ -31,16 +31,17 @@
 #ifndef FILE_DIALOG_H
 #define FILE_DIALOG_H
 
-#include "box_container.h"
 #include "core/io/dir_access.h"
 #include "scene/gui/dialogs.h"
-#include "scene/gui/line_edit.h"
-#include "scene/gui/option_button.h"
-#include "scene/gui/tree.h"
 #include "scene/property_list_helper.h"
 
 class GridContainer;
+class HBoxContainer;
+class LineEdit;
+class OptionButton;
 class PopupMenu;
+class Tree;
+class VBoxContainer;
 
 class FileDialog : public ConfirmationDialog {
 	GDCLASS(FileDialog, ConfirmationDialog);

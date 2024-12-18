@@ -34,7 +34,7 @@
 #include "scene/3d/light_3d.h"
 #include "scene/resources/3d/mesh_library.h"
 #include "scene/resources/3d/primitive_meshes.h"
-#include "scene/resources/physics_material.h"
+#include "scene/resources/3d/physics/physics_material.h"
 #include "scene/resources/surface_tool.h"
 #include "servers/navigation_server_3d.h"
 #include "servers/rendering_server.h"

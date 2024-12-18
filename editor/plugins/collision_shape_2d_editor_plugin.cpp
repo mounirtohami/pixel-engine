@@ -36,14 +36,14 @@
 #include "editor/editor_settings.h"
 #include "editor/editor_undo_redo_manager.h"
 #include "scene/main/viewport.h"
-#include "scene/resources/2d/capsule_shape_2d.h"
-#include "scene/resources/2d/circle_shape_2d.h"
-#include "scene/resources/2d/concave_polygon_shape_2d.h"
-#include "scene/resources/2d/convex_polygon_shape_2d.h"
-#include "scene/resources/2d/rectangle_shape_2d.h"
-#include "scene/resources/2d/segment_shape_2d.h"
-#include "scene/resources/2d/separation_ray_shape_2d.h"
-#include "scene/resources/2d/world_boundary_shape_2d.h"
+#include "scene/resources/2d/physics/capsule_shape_2d.h"
+#include "scene/resources/2d/physics/circle_shape_2d.h"
+#include  "scene/resources/2d/physics/concave_polygon_shape_2d.h"
+#include "scene/resources/2d/physics/convex_polygon_shape_2d.h"
+#include "scene/resources/2d/physics/rectangle_shape_2d.h"
+#include "scene/resources/2d/physics/segment_shape_2d.h"
+#include "scene/resources/2d/physics/separation_ray_shape_2d.h"
+#include "scene/resources/2d/physics/world_boundary_shape_2d.h"
 
 CollisionShape2DEditor::CollisionShape2DEditor() {
 	grab_threshold = EDITOR_GET("editors/polygon_editor/point_grab_radius");

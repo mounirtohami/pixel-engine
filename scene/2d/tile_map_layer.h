@@ -110,11 +110,15 @@ struct CellData {
 	SelfList<CellData> rendering_quadrant_list_element;
 	LocalVector<LocalVector<RID>> occluders;
 
+#ifndef _PHYSICS_DISABLED
 	// Physics.
 	LocalVector<RID> bodies;
+#endif // !_PHYSICS_DISABLED
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation.
 	LocalVector<RID> navigation_regions;
+#endif // !_NAVIGATION_DISABLED
 
 	// Scenes.
 	String scene;
@@ -134,8 +138,12 @@ struct CellData {
 		coords = p_other.coords;
 		cell = p_other.cell;
 		occluders = p_other.occluders;
+#ifndef _PHYSICS_DISABLED
 		bodies = p_other.bodies;
+#endif // !_PHYSICS_DISABLED
+#ifndef _NAVIGATION_DISABLED
 		navigation_regions = p_other.navigation_regions;
+#endif // !_NAVIGATION_DISABLED
 		scene = p_other.scene;
 		runtime_tile_data_cache = p_other.runtime_tile_data_cache;
 	}
@@ -147,8 +155,12 @@ struct CellData {
 		coords = p_other.coords;
 		cell = p_other.cell;
 		occluders = p_other.occluders;
+#ifndef _PHYSICS_DISABLED
 		bodies = p_other.bodies;
+#endif // !_PHYSICS_DISABLED
+#ifndef _NAVIGATION_DISABLED
 		navigation_regions = p_other.navigation_regions;
+#endif // !_NAVIGATION_DISABLED
 		scene = p_other.scene;
 		runtime_tile_data_cache = p_other.runtime_tile_data_cache;
 	}
@@ -291,9 +303,11 @@ private:
 
 	bool occlusion_enabled = true;
 
+#ifndef _NAVIGATION_DISABLED
 	bool navigation_enabled = true;
 	RID navigation_map_override;
 	DebugVisibilityMode navigation_visibility_mode = DEBUG_VISIBILITY_MODE_DEFAULT;
+#endif // !_NAVIGATION_DISABLED
 
 	// Internal.
 	bool pending_update = false;
@@ -342,7 +356,7 @@ private:
 #ifdef DEBUG_ENABLED
 	void _rendering_draw_cell_debug(const RID &p_canvas_item, const Vector2 &p_quadrant_pos, const CellData &r_cell_data);
 #endif // DEBUG_ENABLED
-
+#ifndef _PHYSICS_DISABLED
 	HashMap<RID, Vector2i> bodies_coords; // Mapping for RID to coords.
 	bool _physics_was_cleaned_up = false;
 	void _physics_update(bool p_force_cleanup);
@@ -352,7 +366,9 @@ private:
 #ifdef DEBUG_ENABLED
 	void _physics_draw_cell_debug(const RID &p_canvas_item, const Vector2 &p_quadrant_pos, const CellData &r_cell_data);
 #endif // DEBUG_ENABLED
+#endif // !_PHYSICS_DISABLED
 
+#ifndef _NAVIGATION_DISABLED
 	bool _navigation_was_cleaned_up = false;
 	void _navigation_update(bool p_force_cleanup);
 	void _navigation_notification(int p_what);
@@ -361,6 +377,7 @@ private:
 #ifdef DEBUG_ENABLED
 	void _navigation_draw_cell_debug(const RID &p_canvas_item, const Vector2 &p_quadrant_pos, const CellData &r_cell_data);
 #endif // DEBUG_ENABLED
+#endif // !_NAVIGATION_DISABLED
 
 	bool _scenes_was_cleaned_up = false;
 	void _scenes_update(bool p_force_cleanup);
@@ -453,10 +470,11 @@ public:
 	// Terrains.
 	void set_cells_terrain_connect(TypedArray<Vector2i> p_cells, int p_terrain_set, int p_terrain, bool p_ignore_empty_terrains = true);
 	void set_cells_terrain_path(TypedArray<Vector2i> p_path, int p_terrain_set, int p_terrain, bool p_ignore_empty_terrains = true);
-
+#ifndef _PHYSICS_DISABLED
 	// --- Physics helpers ---
 	bool has_body_rid(RID p_physics_body) const;
 	Vector2i get_coords_for_body_rid(RID p_physics_body) const; // For finding tiles from collision.
+#endif // !_PHYSICS_DISABLED
 
 	// --- Runtime ---
 	void update_internals();
@@ -505,12 +523,14 @@ public:
 	void set_occlusion_enabled(bool p_enabled);
 	bool is_occlusion_enabled() const;
 
+#ifndef _NAVIGATION_DISABLED
 	void set_navigation_enabled(bool p_enabled);
 	bool is_navigation_enabled() const;
 	void set_navigation_map(RID p_map);
 	RID get_navigation_map() const;
 	void set_navigation_visibility_mode(DebugVisibilityMode p_show_navigation);
 	DebugVisibilityMode get_navigation_visibility_mode() const;
+#endif // !_NAVIGATION_DISABLED
 
 	TileMapLayer();
 	~TileMapLayer();

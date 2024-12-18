@@ -5,3 +5,8 @@ Import("env")
 
 env.add_source_files(env.scene_sources, "*.cpp")
 env.add_source_files(env.scene_sources, "skeleton/*.cpp")
+if not env["disable_physics"]:
+    env.add_source_files(env.scene_sources, "skeleton/physics/*.cpp")
+    env.add_source_files(env.scene_sources, "physics/*.cpp")
+if not env["disable_navigation"]:
+    env.add_source_files(env.scene_sources, "navigation/*.cpp")

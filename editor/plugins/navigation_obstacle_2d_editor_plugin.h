@@ -32,7 +32,7 @@
 #define NAVIGATION_OBSTACLE_2D_EDITOR_PLUGIN_H
 
 #include "editor/plugins/abstract_polygon_2d_editor.h"
-#include "scene/2d/navigation_obstacle_2d.h"
+#include "scene/2d/navigation/navigation_obstacle_2d.h"
 
 class NavigationObstacle2DEditor : public AbstractPolygon2DEditor {
 	GDCLASS(NavigationObstacle2DEditor, AbstractPolygon2DEditor);
