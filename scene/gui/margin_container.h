@@ -55,6 +55,8 @@ public:
 
 	int get_margin_size(Side p_side) const;
 
+	void set_margin_all(int p_margin);
+
 	MarginContainer();
 };
 
