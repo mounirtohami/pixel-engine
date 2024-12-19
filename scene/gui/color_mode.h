@@ -28,10 +28,24 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #ifndef COLOR_MODE_H
 #define COLOR_MODE_H
 
-#include "scene/gui/color_picker.h"
+#include "core/string/ustring.h"
+
+struct Color;
+class ColorPicker;
 
 class GradientTexture2D;
 
@@ -46,18 +60,17 @@ public:
 	virtual float get_spinbox_arrow_step() const { return get_slider_step(); }
 	virtual String get_slider_label(int idx) const = 0;
 	virtual float get_slider_max(int idx) const = 0;
+	virtual bool can_allow_greater() const { return false; }
 	virtual float get_slider_value(int idx) const = 0;
 
 	virtual Color get_color() const = 0;
 
-	virtual void _value_changed() {}
+	virtual void _value_changed() {};
 
 	virtual void slider_draw(int p_which) = 0;
-	virtual bool apply_theme() const { return false; }
-	virtual ColorPicker::PickerShapeType get_shape_override() const { return ColorPicker::SHAPE_MAX; }
 
 	ColorMode(ColorPicker *p_color_picker);
-	virtual ~ColorMode() {}
+	virtual ~ColorMode() {};
 };
 
 class ColorModeHSV : public ColorMode {
@@ -81,18 +94,20 @@ public:
 	virtual void slider_draw(int p_which) override;
 
 	ColorModeHSV(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {}
+			ColorMode(p_color_picker) {};
 };
 
 class ColorModeRGB : public ColorMode {
 public:
 	String labels[3] = { "R", "G", "B" };
+	float slider_max[4] = { 255, 255, 255, 255 };
 
 	virtual String get_name() const override { return "RGB"; }
 
 	virtual float get_slider_step() const override { return 1; }
 	virtual String get_slider_label(int idx) const override;
 	virtual float get_slider_max(int idx) const override;
+	virtual bool can_allow_greater() const override { return true; }
 	virtual float get_slider_value(int idx) const override;
 
 	virtual Color get_color() const override;
@@ -100,29 +115,28 @@ public:
 	virtual void slider_draw(int p_which) override;
 
 	ColorModeRGB(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {}
+			ColorMode(p_color_picker) {};
 };
 
 class ColorModeRAW : public ColorMode {
 public:
 	String labels[3] = { "R", "G", "B" };
-	float slider_max[4] = { 100, 100, 100, 1 };
+	float slider_max[4] = { 1, 1, 1, 1 };
 
 	virtual String get_name() const override { return "RAW"; }
 
-	virtual float get_slider_step() const override { return 0.001; }
-	virtual float get_spinbox_arrow_step() const override { return 0.01; }
+	virtual float get_slider_step() const override { return 1.0 / 255.0; }
 	virtual String get_slider_label(int idx) const override;
 	virtual float get_slider_max(int idx) const override;
+	virtual bool can_allow_greater() const override { return true; }
 	virtual float get_slider_value(int idx) const override;
 
 	virtual Color get_color() const override;
 
 	virtual void slider_draw(int p_which) override;
-	virtual bool apply_theme() const override;
 
 	ColorModeRAW(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {}
+			ColorMode(p_color_picker) {};
 };
 
 class ColorModeOKHSL : public ColorMode {
@@ -133,7 +147,7 @@ public:
 	float cached_saturation = 0.0;
 	Ref<GradientTexture2D> hue_texture = nullptr;
 
-	virtual String get_name() const override { return "OKHSL"; }
+	virtual String get_name() const override { return "HSL"; }
 
 	virtual float get_slider_step() const override { return 1.0; }
 	virtual String get_slider_label(int idx) const override;
@@ -145,12 +159,11 @@ public:
 	virtual void _value_changed() override;
 
 	virtual void slider_draw(int p_which) override;
-	virtual ColorPicker::PickerShapeType get_shape_override() const override { return ColorPicker::SHAPE_OKHSL_CIRCLE; }
 
 	ColorModeOKHSL(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {}
+			ColorMode(p_color_picker) {};
 
-	~ColorModeOKHSL() {}
+	~ColorModeOKHSL() {};
 };
 
 #endif // COLOR_MODE_H
