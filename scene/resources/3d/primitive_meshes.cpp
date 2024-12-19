@@ -3711,9 +3711,11 @@ Ref<Font> TextMesh::_get_font_or_default() const {
 
 	ThemeContext *global_context = ThemeDB::get_singleton()->get_default_theme_context();
 	Vector<Ref<Theme>> themes = global_context->get_themes();
+#ifdef TOOLS_ENABLED
 	if (Engine::get_singleton()->is_editor_hint()) {
 		themes.insert(0, ThemeDB::get_singleton()->get_project_theme());
 	}
+#endif // TOOLS_ENABLED
 
 	for (const Ref<Theme> &theme : themes) {
 		if (theme.is_null()) {
