@@ -347,7 +347,7 @@ void Theme::remove_icon_type(const StringName &p_theme_type) {
 		return;
 	}
 
-	_freeze_change_propagation();
+	freeze_change_propagation();
 
 	for (const KeyValue<StringName, Ref<Texture2D>> &E : icon_map[p_theme_type]) {
 		Ref<Texture2D> icon = E.value;
@@ -358,7 +358,7 @@ void Theme::remove_icon_type(const StringName &p_theme_type) {
 
 	icon_map.erase(p_theme_type);
 
-	_unfreeze_and_propagate_changes();
+	unfreeze_and_propagate_changes();
 }
 
 void Theme::get_icon_type_list(List<StringName> *p_list) const {
@@ -457,7 +457,7 @@ void Theme::remove_stylebox_type(const StringName &p_theme_type) {
 		return;
 	}
 
-	_freeze_change_propagation();
+	freeze_change_propagation();
 
 	for (const KeyValue<StringName, Ref<StyleBox>> &E : style_map[p_theme_type]) {
 		Ref<StyleBox> style = E.value;
@@ -468,7 +468,7 @@ void Theme::remove_stylebox_type(const StringName &p_theme_type) {
 
 	style_map.erase(p_theme_type);
 
-	_unfreeze_and_propagate_changes();
+	unfreeze_and_propagate_changes();
 }
 
 void Theme::get_stylebox_type_list(List<StringName> *p_list) const {
@@ -573,7 +573,7 @@ void Theme::remove_font_type(const StringName &p_theme_type) {
 		return;
 	}
 
-	_freeze_change_propagation();
+	freeze_change_propagation();
 
 	for (const KeyValue<StringName, Ref<Font>> &E : font_map[p_theme_type]) {
 		Ref<Font> font = E.value;
@@ -584,7 +584,7 @@ void Theme::remove_font_type(const StringName &p_theme_type) {
 
 	font_map.erase(p_theme_type);
 
-	_unfreeze_and_propagate_changes();
+	unfreeze_and_propagate_changes();
 }
 
 void Theme::get_font_type_list(List<StringName> *p_list) const {
@@ -1549,13 +1549,15 @@ void Theme::_emit_theme_changed(bool p_notify_list_changed) {
 	emit_changed();
 }
 
-void Theme::_freeze_change_propagation() {
+void Theme::freeze_change_propagation() {
 	no_change_propagation = true;
 }
 
-void Theme::_unfreeze_and_propagate_changes() {
-	no_change_propagation = false;
-	_emit_theme_changed(true);
+void Theme::unfreeze_and_propagate_changes() {
+	if (no_change_propagation) {
+		no_change_propagation = false;
+		_emit_theme_changed(true);
+	}
 }
 
 void Theme::merge_with(const Ref<Theme> &p_other) {
@@ -1563,7 +1565,7 @@ void Theme::merge_with(const Ref<Theme> &p_other) {
 		return;
 	}
 
-	_freeze_change_propagation();
+	freeze_change_propagation();
 
 	// Colors.
 	{
@@ -1637,7 +1639,7 @@ void Theme::merge_with(const Ref<Theme> &p_other) {
 		set_default_base_scale(p_other->default_base_scale);
 	}
 
-	_unfreeze_and_propagate_changes();
+	unfreeze_and_propagate_changes();
 }
 
 void Theme::clear() {

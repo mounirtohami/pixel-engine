@@ -108,13 +108,12 @@ protected:
 	HashMap<StringName, List<StringName>> variation_base_map;
 
 	static void _bind_methods();
-
-	void _freeze_change_propagation();
-	void _unfreeze_and_propagate_changes();
-
 	virtual void reset_state() override;
 
 public:
+	void freeze_change_propagation();
+	void unfreeze_and_propagate_changes();
+
 	static bool is_valid_type_name(const String &p_name);
 	static bool is_valid_item_name(const String &p_name);
 

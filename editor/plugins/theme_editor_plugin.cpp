@@ -3290,7 +3290,7 @@ void ThemeTypeEditor::_update_stylebox_from_leading() {
 	ERR_FAIL_COND_MSG(edited_theme.is_null(), "Leading stylebox does not have an edited theme to update");
 
 	// Prevent changes from immediately being reported while the operation is still ongoing.
-	edited_theme->_freeze_change_propagation();
+	edited_theme->freeze_change_propagation();
 
 	List<StringName> names;
 	edited_theme->get_stylebox_list(edited_type, &names);
@@ -3330,7 +3330,7 @@ void ThemeTypeEditor::_update_stylebox_from_leading() {
 	leading_stylebox.ref_stylebox = leading_stylebox.stylebox->duplicate();
 
 	// Allow changes to be reported now that the operation is finished.
-	edited_theme->_unfreeze_and_propagate_changes();
+	edited_theme->unfreeze_and_propagate_changes();
 }
 
 void ThemeTypeEditor::_type_variation_changed(const String p_value) {
