@@ -49,14 +49,31 @@
 #include "scene/resources/font.h"
 #include "scene/resources/style_box.h"
 #include "scene/resources/texture.h"
+#ifndef PIXEL_ENGINE
 #include "scene/theme/default_theme.h"
+#else
+#include "scene/theme/pixel_default_theme.h"
+#endif // !PIXEL_ENGINE
 #include "servers/text_server.h"
 
 // Default engine theme creation and configuration.
+#ifdef PIXEL_ENGINE
+Color ThemeDB::_get_font_color() const {
+	Color fcolor = Color(0.8, 0.8, 0.8);
+	FontColorOverride fcolor_override = (FontColorOverride)(int)GLOBAL_GET("gui/theme/font_color_override");
+	bool is_dark_theme = ((Color)GLOBAL_GET("gui/theme/base_color")).get_luminance() <= 0.5;
+	if (fcolor_override == FONT_COLOR_OVERRIDE_DARK || (fcolor_override == FONT_COLOR_OVERRIDE_AUTO && !is_dark_theme)) {
+		fcolor = Color(0.05, 0.05, 0.05);
+	} else if (fcolor_override == FONT_COLOR_OVERRIDE_CUSTOM) {
+		fcolor = GLOBAL_GET("gui/theme/custom_font_color");
+	}
+	return fcolor;
+}
+#endif // PIXEL_ENGINE
 
 void ThemeDB::initialize_theme() {
 	// Default theme-related project settings.
-
+#ifndef PIXEL_ENGINE
 	// Allow creating the default theme at a different scale to suit higher/lower base resolutions.
 	float default_theme_scale = GLOBAL_DEF(PropertyInfo(Variant::FLOAT, "gui/theme/default_theme_scale", PROPERTY_HINT_RANGE, "0.5,8,0.01", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED), 1.0);
 
@@ -97,13 +114,31 @@ void ThemeDB::initialize_theme() {
 	if (RenderingServer::get_singleton()) {
 		make_default_theme(default_theme_scale, project_font, font_subpixel_positioning, font_hinting, font_antialiasing, lcd_subpixel_layout, font_msdf, font_generate_mipmaps);
 	}
+#else
+	// Always generate the default theme to serve as a fallback for all required theme definitions.
+	if (RenderingServer::get_singleton()) {
+		Ref<Font> project_font;
+		if (!custom_font.is_empty() && FileAccess::exists(custom_font)) {
+			project_font = ResourceLoader::load(custom_font);
+			if (project_font.is_null()) {
+				ERR_PRINT("Error loading custom project font '" + custom_font + "'");
+			}
+		}
+
+		make_default_theme(project_font, scale, font_subpixel_positioning, font_hinting, font_antialiasing, font_lcd_subpixel_layout, font_msdf, font_generate_mipmaps, base_color, accent_color, _get_font_color(), font_outline_color, contrast, b2_contrast, b3_contrast, b4_contrast, a2_contrast, bg_contrast, margin, padding, border_width, corner_radius, font_size, font_outline_size, font_embolden, font_spacing_glyph, font_spacing_space, font_spacing_top, font_spacing_bottom);
+	}
+#endif // !PIXEL_ENGINE
 
 	_init_default_theme_context();
 }
 
 void ThemeDB::initialize_theme_noproject() {
 	if (RenderingServer::get_singleton()) {
+#ifndef PIXEL_ENGINE
 		make_default_theme(1.0, Ref<Font>());
+#else
+		make_default_theme(Ref<Font>());
+#endif // !PIXEL_ENGINE
 	}
 
 	_init_default_theme_context();
@@ -115,6 +150,9 @@ void ThemeDB::finalize_theme() {
 	}
 
 	_finalize_theme_contexts();
+#ifdef PIXEL_ENGINE
+	finalize_default_theme();
+#endif // PIXEL_ENGINE
 	default_theme.unref();
 
 	fallback_font.unref();
@@ -132,6 +170,7 @@ Ref<Theme> ThemeDB::get_default_theme() {
 	return default_theme;
 }
 
+#ifndef PIXEL_ENGINE
 void ThemeDB::set_project_theme(const Ref<Theme> &p_project_default) {
 	project_theme = p_project_default;
 }
@@ -139,6 +178,7 @@ void ThemeDB::set_project_theme(const Ref<Theme> &p_project_default) {
 Ref<Theme> ThemeDB::get_project_theme() {
 	return project_theme;
 }
+#endif // !PIXEL_ENGINE
 
 // Universal fallback values for theme item types.
 
@@ -278,18 +318,18 @@ void ThemeDB::_propagate_theme_context(Node *p_from_node, ThemeContext *p_contex
 
 void ThemeDB::_init_default_theme_context() {
 	default_theme_context = memnew(ThemeContext);
-
 	Vector<Ref<Theme>> themes;
 
+#ifndef PIXEL_ENGINE
 	// Only add the project theme to the default context when running projects.
-
 #ifdef TOOLS_ENABLED
 	if (!Engine::get_singleton()->is_editor_hint()) {
 		themes.push_back(project_theme);
 	}
 #else
 	themes.push_back(project_theme);
-#endif
+#endif // TOOLS_ENABLED
+#endif // !PIXEL_ENGINE
 
 	themes.push_back(default_theme);
 	default_theme_context->set_themes(themes);
@@ -421,9 +461,245 @@ void ThemeDB::_sort_theme_items() {
 	}
 }
 
+#ifdef PIXEL_ENGINE
+void ThemeDB::_update_default_theme() {
+	bool update_icons = false;
+	bool scale_changed = false;
+	bool border_padding_changed = false;
+	bool update_colors = false;
+
+	float _scale = GLOBAL_GET("gui/theme/default_theme_scale");
+	if (default_theme->get_default_base_scale() != _scale) {
+		default_theme->set_default_base_scale(_scale);
+		scale_changed = true;
+	}
+
+	Color _font_color = _get_font_color();
+	if (font_color != _font_color) {
+		font_color = _font_color;
+		default_theme->freeze_change_propagation();
+		update_font_color(default_theme, font_color);
+		update_icons = true;
+	}
+
+	Color _accent_color = GLOBAL_GET("gui/theme/accent_color");
+	if (accent_color != _accent_color) {
+		accent_color = _accent_color;
+		update_icons = true;
+		update_colors = true;
+	}
+
+	if (update_icons || scale_changed) {
+		default_theme->freeze_change_propagation();
+		update_theme_icons(default_theme, font_color, accent_color);
+		emit_signal(SNAME("icons_changed"));
+	}
+
+	Color _font_outline_color = GLOBAL_GET("gui/theme/font_outline_color");
+	if (font_outline_color != _font_outline_color) {
+		font_outline_color = _font_outline_color;
+		default_theme->freeze_change_propagation();
+		update_font_outline_color(default_theme, font_outline_color);
+	}
+
+	int _margin = GLOBAL_GET("gui/theme/margin");
+	if (margin != _margin || scale_changed) {
+		margin = _margin;
+		default_theme->freeze_change_propagation();
+		update_theme_margins(default_theme, margin);
+	}
+
+	int _padding = GLOBAL_GET("gui/theme/padding");
+	if (padding != _padding || scale_changed) {
+		padding = _padding;
+		default_theme->freeze_change_propagation();
+		update_theme_padding(default_theme, padding);
+		border_padding_changed = true;
+	}
+
+	int _corner_radius = GLOBAL_GET("gui/theme/corner_radius");
+	if (corner_radius != _corner_radius || scale_changed) {
+		corner_radius = _corner_radius;
+		default_theme->freeze_change_propagation();
+		update_theme_corner_radius(default_theme, corner_radius);
+	}
+
+	int _border_width = GLOBAL_GET("gui/theme/border_width");
+	if (border_width != _border_width || scale_changed) {
+		border_width = _border_width;
+		default_theme->freeze_change_propagation();
+		update_theme_border_width(default_theme, border_width);
+		border_padding_changed = true;
+	}
+
+	int _font_outline_size = GLOBAL_GET("gui/theme/font_outline_size");
+	if (font_outline_size != _font_outline_size || scale_changed) {
+		font_outline_size = _font_outline_size;
+		default_theme->freeze_change_propagation();
+		update_font_outline_size(default_theme, font_outline_size);
+	}
+
+	int _font_size = GLOBAL_GET("gui/theme/font_size");
+	if (font_size != _font_size || scale_changed) {
+		font_size = _font_size;
+		default_theme->freeze_change_propagation();
+		update_font_size(default_theme, font_size);
+	}
+
+	if (border_padding_changed || scale_changed) {
+		default_theme->freeze_change_propagation();
+		update_theme_border_padding(default_theme, border_width + padding);
+	}
+
+	Color _base_color = GLOBAL_GET("gui/theme/base_color");
+	if (base_color != _base_color) {
+		base_color = _base_color;
+		update_colors = true;
+	}
+
+	float _contrast = GLOBAL_GET("gui/theme/contrast");
+	if (contrast != _contrast) {
+		contrast = _contrast;
+		update_colors = true;
+	}
+
+	float _b2_contrast = GLOBAL_GET("gui/theme/base2_contrast");
+	if (b2_contrast != _b2_contrast) {
+		b2_contrast = _b2_contrast;
+		update_colors = true;
+	}
+
+	float _b3_contrast = GLOBAL_GET("gui/theme/base3_contrast");
+	if (b3_contrast != _b3_contrast) {
+		b3_contrast = _b3_contrast;
+		update_colors = true;
+	}
+
+	float _b4_contrast = GLOBAL_GET("gui/theme/base4_contrast");
+	if (b4_contrast != _b4_contrast) {
+		b4_contrast = _b4_contrast;
+		update_colors = true;
+	}
+
+	float _a2_contrast = GLOBAL_GET("gui/theme/accent2_contrast");
+	if (a2_contrast != _a2_contrast) {
+		a2_contrast = _a2_contrast;
+		update_colors = true;
+	}
+
+	float _bg_contrast = GLOBAL_GET("gui/theme/bg_contrast");
+	if (bg_contrast != _bg_contrast) {
+		bg_contrast = _bg_contrast;
+		update_colors = true;
+	}
+
+	if (update_colors) {
+		default_theme->freeze_change_propagation();
+		update_theme_colors(default_theme, base_color, accent_color, contrast, b2_contrast, b3_contrast, b4_contrast, a2_contrast, bg_contrast);
+	}
+
+	float _font_embolden = GLOBAL_GET("gui/theme/font_embolden");
+	if (font_embolden != _font_embolden) {
+		font_embolden = _font_embolden;
+		default_theme->freeze_change_propagation();
+		update_font_embolden(font_embolden);
+	}
+
+	int _font_spacing_glyph = GLOBAL_GET("gui/theme/font_spacing_glyph");
+	if (font_spacing_glyph != _font_spacing_glyph || scale_changed) {
+		font_spacing_glyph = _font_spacing_glyph;
+		default_theme->freeze_change_propagation();
+		update_font_spacing_glyph(Math::round(font_spacing_glyph * _scale));
+	}
+
+	int _font_spacing_space = GLOBAL_GET("gui/theme/font_spacing_space");
+	if (font_spacing_space != _font_spacing_space || scale_changed) {
+		font_spacing_space = _font_spacing_space;
+		default_theme->freeze_change_propagation();
+		update_font_spacing_space(Math::round(font_spacing_space * _scale));
+	}
+
+	int _font_spacing_top = GLOBAL_GET("gui/theme/font_spacing_top");
+	if (font_spacing_top != _font_spacing_top || scale_changed) {
+		font_spacing_top = _font_spacing_top;
+		default_theme->freeze_change_propagation();
+		update_font_spacing_top(Math::round(font_spacing_top * _scale));
+	}
+
+	int _font_spacing_bottom = GLOBAL_GET("gui/theme/font_spacing_bottom");
+	if (font_spacing_bottom != _font_spacing_bottom || scale_changed) {
+		font_spacing_bottom = _font_spacing_bottom;
+		default_theme->freeze_change_propagation();
+		update_font_spacing_bottom(Math::round(font_spacing_bottom * _scale));
+	}
+
+	String _custom_font = GLOBAL_GET("gui/theme/custom_font");
+	if (custom_font != _custom_font) {
+		custom_font = _custom_font;
+		Ref<Font> project_font;
+		if (!custom_font.is_empty() && FileAccess::exists(custom_font)) {
+			project_font = ResourceLoader::load(custom_font);
+		} else {
+			project_font = Ref<Font>();
+		}
+		default_theme->freeze_change_propagation();
+		update_theme_font(default_theme, project_font);
+	}
+
+	TextServer::SubpixelPositioning _font_subpixel_positioning = (TextServer::SubpixelPositioning)(int)GLOBAL_GET("gui/theme/default_font_subpixel_positioning");
+	if (font_subpixel_positioning != _font_subpixel_positioning) {
+		font_subpixel_positioning = _font_subpixel_positioning;
+		default_theme->freeze_change_propagation();
+		update_font_subpixel_positioning(font_subpixel_positioning);
+	}
+
+	TextServer::FontAntialiasing _font_antialiasing = (TextServer::FontAntialiasing)(int)GLOBAL_GET("gui/theme/default_font_antialiasing");
+	if (font_antialiasing != _font_antialiasing) {
+		font_antialiasing = _font_antialiasing;
+		default_theme->freeze_change_propagation();
+		update_font_antialiasing(font_antialiasing);
+	}
+
+	TextServer::FontLCDSubpixelLayout _font_lcd_subpixel_layout = (TextServer::FontLCDSubpixelLayout)(int)GLOBAL_GET("gui/theme/lcd_subpixel_layout");
+	if (font_lcd_subpixel_layout != _font_lcd_subpixel_layout) {
+		font_lcd_subpixel_layout = _font_lcd_subpixel_layout;
+		default_theme->freeze_change_propagation();
+		update_font_lcd_subpixel_layout(font_lcd_subpixel_layout);
+	}
+
+	TextServer::Hinting _font_hinting = (TextServer::Hinting)(int)GLOBAL_GET("gui/theme/default_font_hinting");
+	if (font_hinting != _font_hinting) {
+		font_hinting = _font_hinting;
+		default_theme->freeze_change_propagation();
+		update_font_hinting(font_hinting);
+	}
+
+	bool _font_msdf = GLOBAL_GET("gui/theme/default_font_multichannel_signed_distance_field");
+	if (font_msdf != _font_msdf) {
+		font_msdf = _font_msdf;
+		default_theme->freeze_change_propagation();
+		update_font_msdf(font_msdf);
+	}
+
+	bool _font_generate_mipmaps = GLOBAL_GET("gui/theme/default_font_generate_mipmaps");
+	if (font_generate_mipmaps != _font_generate_mipmaps) {
+		font_generate_mipmaps = _font_generate_mipmaps;
+		default_theme->freeze_change_propagation();
+		update_font_generate_mipmaps(font_generate_mipmaps);
+	}
+
+	if (scale_changed) {
+		default_theme->freeze_change_propagation();
+		update_theme_scale(default_theme);
+	}
+
+	default_theme->unfreeze_and_propagate_changes();
+}
+#endif // PIXEL_ENGINE
 // Object methods.
 
 void ThemeDB::_bind_methods() {
+#ifndef PIXEL_ENGINE
 	ClassDB::bind_method(D_METHOD("get_default_theme"), &ThemeDB::get_default_theme);
 	ClassDB::bind_method(D_METHOD("get_project_theme"), &ThemeDB::get_project_theme);
 
@@ -444,8 +720,12 @@ void ThemeDB::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "fallback_font_size", PROPERTY_HINT_RANGE, "0,256,1,or_greater,suffix:px"), "set_fallback_font_size", "get_fallback_font_size");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "fallback_icon", PROPERTY_HINT_RESOURCE_TYPE, "Texture2D", PROPERTY_USAGE_NONE), "set_fallback_icon", "get_fallback_icon");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "fallback_stylebox", PROPERTY_HINT_RESOURCE_TYPE, "StyleBox", PROPERTY_USAGE_NONE), "set_fallback_stylebox", "get_fallback_stylebox");
+#endif // !PIXEL_ENGINE
 
 	ADD_SIGNAL(MethodInfo("fallback_changed"));
+#ifdef PIXEL_ENGINE
+	ADD_SIGNAL(MethodInfo("icons_changed"));
+#endif // PIXEL_ENGINE
 }
 
 // Memory management, reference, and initialization.
@@ -458,8 +738,44 @@ ThemeDB *ThemeDB::get_singleton() {
 
 ThemeDB::ThemeDB() {
 	singleton = this;
+#ifdef PIXEL_ENGINE
+	base_color = GLOBAL_DEF_BASIC(PropertyInfo(Variant::COLOR, "gui/theme/base_color", PROPERTY_HINT_COLOR_NO_ALPHA), Color(0.131, 0.152, 0.234));
+	accent_color = GLOBAL_DEF_BASIC(PropertyInfo(Variant::COLOR, "gui/theme/accent_color", PROPERTY_HINT_COLOR_NO_ALPHA), Color(0.226, 0.478, 0.921));
+	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_color_override", PROPERTY_HINT_ENUM, "Auto,Light,Dark,Custom"), 0);
+	GLOBAL_DEF_BASIC(PropertyInfo(Variant::COLOR, "gui/theme/custom_font_color", PROPERTY_HINT_COLOR_NO_ALPHA), Color(0.8, 0.8, 0.8));
+	font_color = _get_font_color();
+	font_outline_color = GLOBAL_DEF_BASIC(PropertyInfo(Variant::COLOR, "gui/theme/font_outline_color"), Color(0, 0, 0, 0));
+	contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/contrast", PROPERTY_HINT_RANGE, "-1.0, 1.0, 0.01"), 0.2);
+	b2_contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/base2_contrast", PROPERTY_HINT_RANGE, "0.0, 1.0, 0.01"), 0.6);
+	b3_contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/base3_contrast", PROPERTY_HINT_RANGE, "0.0, 1.0, 0.01"), 0.4);
+	b4_contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/base4_contrast", PROPERTY_HINT_RANGE, "0.0, 1.0, 0.01"), 0.2);
+	a2_contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/accent2_contrast", PROPERTY_HINT_RANGE, "0.0, 1.0, 0.01"), 0.6);
+	bg_contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/bg_contrast", PROPERTY_HINT_RANGE, "0.0, 1.0, 0.01"), 0.8);
+	margin = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/margin", PROPERTY_HINT_RANGE, "0, 32, 1"), 4);
+	padding = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/padding", PROPERTY_HINT_RANGE, "0, 32, 1"), 4);
+	border_width = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/border_width", PROPERTY_HINT_RANGE, "0, 32, 1"), 2);
+	corner_radius = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/corner_radius", PROPERTY_HINT_RANGE, "0, 32, 1"), 6);
+	font_size = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_size", PROPERTY_HINT_RANGE, "0, 64, 1"), 16);
+	font_outline_size = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_outline_size", PROPERTY_HINT_RANGE, "0, 64, 1"), 0);
+	font_embolden = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/font_embolden", PROPERTY_HINT_RANGE, "-2.0, 2.0, 0.01"), 0.0);
+	font_spacing_glyph = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_spacing_glyph", PROPERTY_HINT_RANGE, "-64, 64, 1"), 0);
+	font_spacing_space = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_spacing_space", PROPERTY_HINT_RANGE, "-64, 64, 1"), 0);
+	font_spacing_top = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_spacing_top", PROPERTY_HINT_RANGE, "-64, 64, 1"), 0);
+	font_spacing_bottom = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_spacing_bottom", PROPERTY_HINT_RANGE, "-64, 64, 1"), 0);
+	scale = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/default_theme_scale", PROPERTY_HINT_RANGE, "0.5,8,0.01"), 1.0);
+	custom_font = GLOBAL_DEF_BASIC(PropertyInfo(Variant::STRING, "gui/theme/custom_font", PROPERTY_HINT_FILE, "*.tres,*.res,*.otf,*.ttf,*.woff,*.woff2,*.fnt,*.font,*.pfb,*.pfm"), "");
+	font_subpixel_positioning = (TextServer::SubpixelPositioning)(int)GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/default_font_subpixel_positioning", PROPERTY_HINT_ENUM, "Disabled,Auto,One Half of a Pixel,One Quarter of a Pixel"), TextServer::SUBPIXEL_POSITIONING_AUTO);
+	font_antialiasing = (TextServer::FontAntialiasing)(int)GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/default_font_antialiasing", PROPERTY_HINT_ENUM, "None,Grayscale,LCD Subpixel"), 1);
+	font_lcd_subpixel_layout = (TextServer::FontLCDSubpixelLayout)(int)GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/lcd_subpixel_layout", PROPERTY_HINT_ENUM, "Disabled,Horizontal RGB,Horizontal BGR,Vertical RGB,Vertical BGR"), 1);
+	font_hinting = (TextServer::Hinting)(int)GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/default_font_hinting", PROPERTY_HINT_ENUM, "None,Light,Normal"), TextServer::HINTING_LIGHT);
+	font_msdf = GLOBAL_DEF_BASIC("gui/theme/default_font_multichannel_signed_distance_field", false);
+	font_generate_mipmaps = GLOBAL_DEF_BASIC("gui/theme/default_font_generate_mipmaps", false);
+#endif // PIXEL_ENGINE
 	if (MessageQueue::get_singleton()) { // May not exist in tests etc.
 		callable_mp(this, &ThemeDB::_sort_theme_items).call_deferred();
+#ifdef PIXEL_ENGINE
+		ProjectSettings::get_singleton()->connect("settings_changed", callable_mp(this, &ThemeDB::_update_default_theme));
+#endif // PIXEL_ENGINE
 	}
 }
 
@@ -469,9 +785,14 @@ ThemeDB::~ThemeDB() {
 	// frees any objects that can be recreated by initialize_theme*().
 
 	_finalize_theme_contexts();
+#ifdef PIXEL_ENGINE
+	finalize_default_theme();
+#endif // PIXEL_ENGINE
 
 	default_theme.unref();
+#ifndef PIXEL_ENGINE
 	project_theme.unref();
+#endif // !PIXEL_ENGINE
 
 	fallback_font.unref();
 	fallback_icon.unref();

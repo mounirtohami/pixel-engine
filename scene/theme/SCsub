@@ -5,7 +5,12 @@ Import("env")
 
 import default_theme_builders
 
-env.add_source_files(env.scene_sources, "*.cpp")
+env.add_source_files(env.scene_sources, ["theme_db.cpp", "theme_owner.cpp"])
+
+if env.pixel_engine:
+    env.add_source_files(env.scene_sources, "pixel_default_theme.cpp")
+else:
+    env.add_source_files(env.scene_sources, "default_theme.cpp")
 
 SConscript("icons/SCsub")
 

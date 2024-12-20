@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #ifndef THEME_DB_H
 #define THEME_DB_H
 
@@ -77,8 +88,50 @@ class ThemeDB : public Object {
 	// Global Theme resources used by the default theme context.
 
 	Ref<Theme> default_theme;
+#ifndef PIXEL_ENGINE
 	Ref<Theme> project_theme;
+#endif // !PIXEL_ENGINE
 
+#ifdef PIXEL_ENGINE
+	enum FontColorOverride {
+		FONT_COLOR_OVERRIDE_AUTO,
+		FONT_COLOR_OVERRIDE_LIGHT,
+		FONT_COLOR_OVERRIDE_DARK,
+		FONT_COLOR_OVERRIDE_CUSTOM
+	};
+
+	Color _get_font_color() const;
+
+	Color base_color;
+	Color accent_color;
+	Color font_color;
+	Color font_outline_color;
+	float contrast;
+	float b2_contrast;
+	float b3_contrast;
+	float b4_contrast;
+	float a2_contrast;
+	float bg_contrast;
+	int margin;
+	int padding;
+	int border_width;
+	int corner_radius;
+	int font_size;
+	int font_outline_size;
+	float font_embolden;
+	int font_spacing_glyph;
+	int font_spacing_space;
+	int font_spacing_top;
+	int font_spacing_bottom;
+	float scale;
+	String custom_font;
+	TextServer::SubpixelPositioning font_subpixel_positioning;
+	TextServer::FontLCDSubpixelLayout font_lcd_subpixel_layout;
+	TextServer::FontAntialiasing font_antialiasing;
+	TextServer::Hinting font_hinting;
+	bool font_msdf;
+	bool font_generate_mipmaps;
+#endif // PIXEL_ENGINE
 	// Universal default values, final fallback for every theme.
 
 	float fallback_base_scale = 1.0;
@@ -122,6 +175,9 @@ private:
 	HashMap<StringName, List<ThemeItemBind>> theme_item_binds_list; // Used for listing purposes.
 
 	void _sort_theme_items();
+#ifdef PIXEL_ENGINE
+	void _update_default_theme();
+#endif // PIXEL_ENGINE
 
 protected:
 	static void _bind_methods();
@@ -136,8 +192,10 @@ public:
 	void set_default_theme(const Ref<Theme> &p_default);
 	Ref<Theme> get_default_theme();
 
+#ifndef PIXEL_ENGINE
 	void set_project_theme(const Ref<Theme> &p_project_default);
 	Ref<Theme> get_project_theme();
+#endif // !PIXEL_ENGINE
 
 	// Universal fallback values.
 

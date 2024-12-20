@@ -449,9 +449,11 @@ void Control::_validate_property(PropertyInfo &p_property) const {
 		// Only the default theme and the project theme are used for the list of options.
 		// This is an imposed limitation to simplify the logic needed to leverage those options.
 		ThemeDB::get_singleton()->get_default_theme()->get_type_variation_list(get_class_name(), &names);
+#ifndef PIXEL_ENGINE
 		if (ThemeDB::get_singleton()->get_project_theme().is_valid()) {
 			ThemeDB::get_singleton()->get_project_theme()->get_type_variation_list(get_class_name(), &names);
 		}
+#endif // !PIXEL_ENGINE
 		names.sort_custom<StringName::AlphCompare>();
 
 		Vector<StringName> unique_names;
