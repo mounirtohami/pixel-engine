@@ -69,9 +69,12 @@
 #include "scene/gui/dialogs.h"
 #include "scene/gui/file_dialog.h"
 #include "scene/gui/flow_container.h"
-#include "scene/gui/graph_edit.h"
-#include "scene/gui/graph_frame.h"
-#include "scene/gui/graph_node.h"
+#include "scene/gui/foldable_container.h"
+#ifndef _GRAPH_DISABLED
+#include "scene/gui/graph/graph_edit.h"
+#include "scene/gui/graph/graph_frame.h"
+#include "scene/gui/graph/graph_node.h"
+#endif // !_GRAPH_DISABLED
 #include "scene/gui/grid_container.h"
 #include "scene/gui/item_list.h"
 #include "scene/gui/label.h"
@@ -450,6 +453,7 @@ void register_scene_types() {
 	GDREGISTER_CLASS(HFlowContainer);
 	GDREGISTER_CLASS(VFlowContainer);
 	GDREGISTER_CLASS(MarginContainer);
+	GDREGISTER_CLASS(FoldableContainer);
 
 	OS::get_singleton()->yield(); // may take time to init
 
