@@ -34,6 +34,7 @@
 #include "core/io/json.h"
 #endif // DEV_ENABLED
 #include "core/math/geometry_2d.h"
+#include "servers/physics_server_3d.h"
 
 #include <manifold/manifold.h>
 

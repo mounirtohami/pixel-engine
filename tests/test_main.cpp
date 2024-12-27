@@ -189,13 +189,15 @@
 #ifndef _3D_DISABLED
 #include "servers/navigation_server_2d.h"
 #include "servers/navigation_server_3d.h"
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
+#ifndef _PHYSICS_DISABLED
 #include "servers/physics_server_2d.h"
 #include "servers/physics_server_2d_dummy.h"
 #ifndef _3D_DISABLED
 #include "servers/physics_server_3d.h"
 #include "servers/physics_server_3d_dummy.h"
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
+#endif // !PHYSICS_DISABLED
 #include "servers/rendering/rendering_server_default.h"
 
 int test_main(int argc, char *argv[]) {
@@ -407,6 +409,7 @@ struct GodotTestCaseListener : public doctest::IReporter {
 		}
 #endif // _3D_DISABLED
 
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 		if (physics_server_3d) {
 			physics_server_3d->finish();
@@ -420,6 +423,7 @@ struct GodotTestCaseListener : public doctest::IReporter {
 			memdelete(physics_server_2d);
 			physics_server_2d = nullptr;
 		}
+#endif // !_PHYSICS_DISABLED
 
 		if (Input::get_singleton()) {
 			memdelete(Input::get_singleton());

@@ -31,7 +31,7 @@
 #ifndef TEST_NAVIGATION_OBSTACLE_3D_H
 #define TEST_NAVIGATION_OBSTACLE_3D_H
 
-#include "scene/3d/navigation_obstacle_3d.h"
+#include "scene/3d/navigation/navigation_obstacle_3d.h"
 #include "scene/main/window.h"
 
 #include "tests/test_macros.h"

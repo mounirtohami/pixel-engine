@@ -35,15 +35,17 @@
 #include "scene/main/node.h"
 #include "scene/main/scene_tree.h"
 #include "servers/audio_server.h"
-#include "servers/navigation_server_3d.h"
 #include "servers/rendering_server.h"
 
-// 2D
+#ifndef _NAVIGATION_DISABLED
+#include "servers/navigation_server_3d.h"
+#endif // !_NAVIGATION_DISABLED
+#ifndef _PHYSICS_DISABLED
 #include "servers/physics_server_2d.h"
-
 #ifndef _3D_DISABLED
 #include "servers/physics_server_3d.h"
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
+#endif // !_PHYSICS_DISABLED
 
 Performance *Performance::singleton = nullptr;
 
@@ -73,6 +75,7 @@ void Performance::_bind_methods() {
 	BIND_ENUM_CONSTANT(RENDER_VIDEO_MEM_USED);
 	BIND_ENUM_CONSTANT(RENDER_TEXTURE_MEM_USED);
 	BIND_ENUM_CONSTANT(RENDER_BUFFER_MEM_USED);
+#ifndef _PHYSICS_DISABLED
 	BIND_ENUM_CONSTANT(PHYSICS_2D_ACTIVE_OBJECTS);
 	BIND_ENUM_CONSTANT(PHYSICS_2D_COLLISION_PAIRS);
 	BIND_ENUM_CONSTANT(PHYSICS_2D_ISLAND_COUNT);
@@ -81,7 +84,9 @@ void Performance::_bind_methods() {
 	BIND_ENUM_CONSTANT(PHYSICS_3D_COLLISION_PAIRS);
 	BIND_ENUM_CONSTANT(PHYSICS_3D_ISLAND_COUNT);
 #endif // _3D_DISABLED
+#endif // !_PHYSICS_DISABLED
 	BIND_ENUM_CONSTANT(AUDIO_OUTPUT_LATENCY);
+#ifndef _NAVIGATION_DISABLED
 	BIND_ENUM_CONSTANT(NAVIGATION_ACTIVE_MAPS);
 	BIND_ENUM_CONSTANT(NAVIGATION_REGION_COUNT);
 	BIND_ENUM_CONSTANT(NAVIGATION_AGENT_COUNT);
@@ -92,6 +97,7 @@ void Performance::_bind_methods() {
 	BIND_ENUM_CONSTANT(NAVIGATION_EDGE_CONNECTION_COUNT);
 	BIND_ENUM_CONSTANT(NAVIGATION_EDGE_FREE_COUNT);
 	BIND_ENUM_CONSTANT(NAVIGATION_OBSTACLE_COUNT);
+#endif // !_NAVIGATION_DISABLED
 	BIND_ENUM_CONSTANT(PIPELINE_COMPILATIONS_CANVAS);
 	BIND_ENUM_CONSTANT(PIPELINE_COMPILATIONS_MESH);
 	BIND_ENUM_CONSTANT(PIPELINE_COMPILATIONS_SURFACE);
@@ -203,6 +209,8 @@ double Performance::get_monitor(Monitor p_monitor) const {
 			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW);
 		case PIPELINE_COMPILATIONS_SPECIALIZATION:
 			return RS::get_singleton()->get_rendering_info(RS::RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION);
+
+#ifndef _PHYSICS_DISABLED
 		case PHYSICS_2D_ACTIVE_OBJECTS:
 			return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_ACTIVE_OBJECTS);
 		case PHYSICS_2D_COLLISION_PAIRS:
@@ -211,9 +219,7 @@ double Performance::get_monitor(Monitor p_monitor) const {
 			return PhysicsServer2D::get_singleton()->get_process_info(PhysicsServer2D::INFO_ISLAND_COUNT);
 #ifdef _3D_DISABLED
 		case PHYSICS_3D_ACTIVE_OBJECTS:
-			return 0;
 		case PHYSICS_3D_COLLISION_PAIRS:
-			return 0;
 		case PHYSICS_3D_ISLAND_COUNT:
 			return 0;
 #else
@@ -223,10 +229,20 @@ double Performance::get_monitor(Monitor p_monitor) const {
 			return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_COLLISION_PAIRS);
 		case PHYSICS_3D_ISLAND_COUNT:
 			return PhysicsServer3D::get_singleton()->get_process_info(PhysicsServer3D::INFO_ISLAND_COUNT);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
+#else
+		case PHYSICS_2D_ACTIVE_OBJECTS:
+		case PHYSICS_2D_COLLISION_PAIRS:
+		case PHYSICS_2D_ISLAND_COUNT:
+		case PHYSICS_3D_ACTIVE_OBJECTS:
+		case PHYSICS_3D_COLLISION_PAIRS:
+		case PHYSICS_3D_ISLAND_COUNT:
+			return 0;
 
+#endif // !_PHYSICS_DISABLED
 		case AUDIO_OUTPUT_LATENCY:
 			return AudioServer::get_singleton()->get_output_latency();
+#ifndef _NAVIGATION_DISABLED
 		case NAVIGATION_ACTIVE_MAPS:
 			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_ACTIVE_MAPS);
 		case NAVIGATION_REGION_COUNT:
@@ -247,6 +263,19 @@ double Performance::get_monitor(Monitor p_monitor) const {
 			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_EDGE_FREE_COUNT);
 		case NAVIGATION_OBSTACLE_COUNT:
 			return NavigationServer3D::get_singleton()->get_process_info(NavigationServer3D::INFO_OBSTACLE_COUNT);
+#else
+		case NAVIGATION_ACTIVE_MAPS:
+		case NAVIGATION_REGION_COUNT:
+		case NAVIGATION_AGENT_COUNT:
+		case NAVIGATION_LINK_COUNT:
+		case NAVIGATION_POLYGON_COUNT:
+		case NAVIGATION_EDGE_COUNT:
+		case NAVIGATION_EDGE_MERGE_COUNT:
+		case NAVIGATION_EDGE_CONNECTION_COUNT:
+		case NAVIGATION_EDGE_FREE_COUNT:
+		case NAVIGATION_OBSTACLE_COUNT:
+			return 0;
+#endif // !_NAVIGATION_DISABLED
 
 		default: {
 		}

@@ -58,6 +58,7 @@ class Tree;
 class VBoxContainer;
 class VSplitContainer;
 class Window;
+class Timer;
 
 class AudioStreamImportSettingsDialog;
 class AudioStreamPreviewGenerator;

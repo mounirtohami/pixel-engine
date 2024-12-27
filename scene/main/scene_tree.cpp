@@ -43,18 +43,26 @@
 #include "scene/gui/control.h"
 #include "scene/main/multiplayer_api.h"
 #include "scene/main/viewport.h"
+#include "scene/resources/2d/world_2d.h"
 #include "scene/resources/environment.h"
 #include "scene/resources/image_texture.h"
 #include "scene/resources/material.h"
 #include "scene/resources/mesh.h"
 #include "scene/resources/packed_scene.h"
-#include "scene/resources/world_2d.h"
+#include "servers/display_server.h"
+#ifndef _NAVIGATION_DISABLED
+#include "servers/navigation_server_3d.h"
+#endif // !_NAVIGATION_DISABLED
+#ifndef _PHYSICS_DISABLED
 #include "servers/physics_server_2d.h"
+#ifndef _3D_DISABLED
+#include "servers/physics_server_3d.h"
+#endif // !_3D_DISABLED
+#endif // !_PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 #include "scene/3d/node_3d.h"
 #include "scene/resources/3d/world_3d.h"
-#include "servers/physics_server_3d.h"
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 #include "window.h"
 
 void SceneTreeTimer::_bind_methods() {
@@ -967,10 +975,12 @@ void SceneTree::set_pause(bool p_enabled) {
 
 	paused = p_enabled;
 
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 	PhysicsServer3D::get_singleton()->set_active(!p_enabled);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 	PhysicsServer2D::get_singleton()->set_active(!p_enabled);
+#endif // !_PHYSICS_DISABLED
 	if (get_root()) {
 		get_root()->_propagate_pause_notification(p_enabled);
 	}
@@ -990,11 +1000,12 @@ void SceneTree::set_suspend(bool p_enabled) {
 	suspended = p_enabled;
 
 	Engine::get_singleton()->set_freeze_time_scale(p_enabled);
-
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 	PhysicsServer3D::get_singleton()->set_active(!p_enabled && !paused);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 	PhysicsServer2D::get_singleton()->set_active(!p_enabled && !paused);
+#endif // !_PHYSICS_DISABLED
 	if (get_root()) {
 		get_root()->_propagate_suspend_notification(p_enabled);
 	}
@@ -1989,9 +2000,11 @@ SceneTree::SceneTree() {
 			}
 		}
 	}
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 
+#ifndef _PHYSICS_DISABLED
 	root->set_physics_object_picking(GLOBAL_DEF("physics/common/enable_object_picking", true));
+#endif // !_PHYSICS_DISABLED
 
 	root->connect("close_requested", callable_mp(this, &SceneTree::_main_window_close));
 	root->connect("go_back_requested", callable_mp(this, &SceneTree::_main_window_go_back));

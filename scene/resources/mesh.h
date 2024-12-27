@@ -34,9 +34,9 @@
 #include "core/io/resource.h"
 #include "core/math/face3.h"
 #include "core/math/triangle_mesh.h"
-#ifndef _3D_DISABLED
-#include "scene/resources/3d/shape_3d.h"
-#endif // _3D_DISABLED
+#if !defined(_3D_DISABLED) || !defined(_PHYSICS_DISABLED)
+#include "scene/resources/3d/physics/shape_3d.h"
+#endif // !defined(_3D_DISABLED) || !defined(_PHYSICS_DISABLED)
 #include "scene/resources/material.h"
 #include "servers/rendering_server.h"
 

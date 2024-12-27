@@ -53,9 +53,10 @@
 #ifndef SCROLL_CONTAINER_H
 #define SCROLL_CONTAINER_H
 
-#include "container.h"
+#include "scene/gui/container.h"
 
-#include "scroll_bar.h"
+class VScrollBar;
+class HScrollBar;
 
 class ScrollContainer : public Container {
 	GDCLASS(ScrollContainer, Container);

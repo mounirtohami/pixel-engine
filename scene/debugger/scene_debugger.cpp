@@ -1607,6 +1607,7 @@ void RuntimeNodeSelect::_update_selection() {
 
 		if (ci->_edit_use_rect()) {
 			rect = ci->_edit_get_rect();
+#ifndef _PHYSICS_DISABLED
 		} else {
 			CollisionShape2D *collision_shape = Object::cast_to<CollisionShape2D>(ci);
 			if (collision_shape) {
@@ -1615,6 +1616,7 @@ void RuntimeNodeSelect::_update_selection() {
 					rect = shape->get_rect();
 				}
 			}
+#endif // !_PHYSICS_DISABLED
 		}
 
 		RS::get_singleton()->canvas_item_set_visible(sbox_2d_ci, selection_visible);
@@ -1801,6 +1803,7 @@ void RuntimeNodeSelect::_find_canvas_items_at_pos(const Point2 &p_pos, Node *p_n
 			res.order = ci->get_effective_z_index() + ci->get_canvas_layer();
 			r_items.push_back(res);
 
+#ifndef _PHYSICS_DISABLED
 			// If it's a shape, get the collision object it's from.
 			// FIXME: If the collision object has multiple shapes, only the topmost will be above it in the list.
 			if (Object::cast_to<CollisionShape2D>(ci) || Object::cast_to<CollisionPolygon2D>(ci)) {
@@ -1812,6 +1815,7 @@ void RuntimeNodeSelect::_find_canvas_items_at_pos(const Point2 &p_pos, Node *p_n
 					r_items.push_back(res_col);
 				}
 			}
+#endif // !_PHYSICS_DISABLED
 		}
 	}
 }

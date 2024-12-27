@@ -43,6 +43,7 @@
 class MenuButton;
 class CodeTextEditor;
 class LineEdit;
+class TextureButton;
 
 class GotoLinePopup : public PopupPanel {
 	GDCLASS(GotoLinePopup, PopupPanel);

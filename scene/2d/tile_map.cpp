@@ -165,6 +165,7 @@ void TileMap::_set_layer_tile_data(int p_layer, const PackedInt32Array &p_data) 
 }
 
 void TileMap::_notification(int p_what) {
+#ifndef _PHYSICS_DISABLED
 	switch (p_what) {
 		case TileMap::NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
 			// This is only executed when collision_animatable is enabled.
@@ -184,7 +185,6 @@ void TileMap::_notification(int p_what) {
 
 		case TileMap::NOTIFICATION_LOCAL_TRANSFORM_CHANGED: {
 			// This is only executed when collision_animatable is enabled.
-
 			bool in_editor = false;
 #ifdef TOOLS_ENABLED
 			in_editor = Engine::get_singleton()->is_editor_hint();
@@ -201,6 +201,7 @@ void TileMap::_notification(int p_what) {
 			}
 		} break;
 	}
+#endif // !_PHYSICS_DISABLED
 }
 
 #ifndef DISABLE_DEPRECATED
@@ -371,22 +372,7 @@ int TileMap::get_layer_z_index(int p_layer) const {
 	TILEMAP_CALL_FOR_LAYER_V(p_layer, 0, get_z_index);
 }
 
-void TileMap::set_layer_navigation_enabled(int p_layer, bool p_enabled) {
-	TILEMAP_CALL_FOR_LAYER(p_layer, set_navigation_enabled, p_enabled);
-}
-
-bool TileMap::is_layer_navigation_enabled(int p_layer) const {
-	TILEMAP_CALL_FOR_LAYER_V(p_layer, false, is_navigation_enabled);
-}
-
-void TileMap::set_layer_navigation_map(int p_layer, RID p_map) {
-	TILEMAP_CALL_FOR_LAYER(p_layer, set_navigation_map, p_map);
-}
-
-RID TileMap::get_layer_navigation_map(int p_layer) const {
-	TILEMAP_CALL_FOR_LAYER_V(p_layer, RID(), get_navigation_map);
-}
-
+#ifndef _PHYSICS_DISABLED
 void TileMap::set_collision_animatable(bool p_collision_animatable) {
 	if (collision_animatable == p_collision_animatable) {
 		return;
@@ -417,6 +403,24 @@ void TileMap::set_collision_visibility_mode(TileMap::VisibilityMode p_show_colli
 TileMap::VisibilityMode TileMap::get_collision_visibility_mode() const {
 	return collision_visibility_mode;
 }
+#endif // !_PHYSICS_DISABLED
+
+#ifndef _NAVIGATION_DISABLED
+void TileMap::set_layer_navigation_enabled(int p_layer, bool p_enabled) {
+	TILEMAP_CALL_FOR_LAYER(p_layer, set_navigation_enabled, p_enabled);
+}
+
+bool TileMap::is_layer_navigation_enabled(int p_layer) const {
+	TILEMAP_CALL_FOR_LAYER_V(p_layer, false, is_navigation_enabled);
+}
+
+void TileMap::set_layer_navigation_map(int p_layer, RID p_map) {
+	TILEMAP_CALL_FOR_LAYER(p_layer, set_navigation_map, p_map);
+}
+
+RID TileMap::get_layer_navigation_map(int p_layer) const {
+	TILEMAP_CALL_FOR_LAYER_V(p_layer, RID(), get_navigation_map);
+}
 
 void TileMap::set_navigation_visibility_mode(TileMap::VisibilityMode p_show_navigation) {
 	if (navigation_visibility_mode == p_show_navigation) {
@@ -432,6 +436,7 @@ void TileMap::set_navigation_visibility_mode(TileMap::VisibilityMode p_show_navi
 TileMap::VisibilityMode TileMap::get_navigation_visibility_mode() const {
 	return navigation_visibility_mode;
 }
+#endif // !_NAVIGATION_DISABLED
 
 void TileMap::set_y_sort_enabled(bool p_enable) {
 	if (is_y_sort_enabled() == p_enable) {
@@ -592,6 +597,7 @@ TileMapCell TileMap::get_cell(int p_layer, const Vector2i &p_coords, bool p_use_
 	TILEMAP_CALL_FOR_LAYER_V(p_layer, TileMapCell(), get_cell, p_coords);
 }
 
+#ifndef _PHYSICS_DISABLED
 Vector2i TileMap::get_coords_for_body_rid(RID p_physics_body) {
 	for (const TileMapLayer *layer : layers) {
 		if (layer->has_body_rid(p_physics_body)) {
@@ -609,6 +615,7 @@ int TileMap::get_layer_for_body_rid(RID p_physics_body) {
 	}
 	ERR_FAIL_V_MSG(-1, vformat("No tiles for the given body RID %d.", p_physics_body.get_id()));
 }
+#endif // !_PHYSICS_DISABLED
 
 void TileMap::fix_invalid_tiles() {
 	for (TileMapLayer *layer : layers) {
@@ -918,18 +925,24 @@ void TileMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_layer_y_sort_origin", "layer"), &TileMap::get_layer_y_sort_origin);
 	ClassDB::bind_method(D_METHOD("set_layer_z_index", "layer", "z_index"), &TileMap::set_layer_z_index);
 	ClassDB::bind_method(D_METHOD("get_layer_z_index", "layer"), &TileMap::get_layer_z_index);
+
+#ifndef _NAVIGATION_DISABLED
 	ClassDB::bind_method(D_METHOD("set_layer_navigation_enabled", "layer", "enabled"), &TileMap::set_layer_navigation_enabled);
 	ClassDB::bind_method(D_METHOD("is_layer_navigation_enabled", "layer"), &TileMap::is_layer_navigation_enabled);
 	ClassDB::bind_method(D_METHOD("set_layer_navigation_map", "layer", "map"), &TileMap::set_layer_navigation_map);
 	ClassDB::bind_method(D_METHOD("get_layer_navigation_map", "layer"), &TileMap::get_layer_navigation_map);
+	ClassDB::bind_method(D_METHOD("set_navigation_visibility_mode", "navigation_visibility_mode"), &TileMap::set_navigation_visibility_mode);
+	ClassDB::bind_method(D_METHOD("get_navigation_visibility_mode"), &TileMap::get_navigation_visibility_mode);
+#endif // !_NAVIGATION_DISABLED
 
+#ifndef _PHYSICS_DISABLED
 	ClassDB::bind_method(D_METHOD("set_collision_animatable", "enabled"), &TileMap::set_collision_animatable);
 	ClassDB::bind_method(D_METHOD("is_collision_animatable"), &TileMap::is_collision_animatable);
 	ClassDB::bind_method(D_METHOD("set_collision_visibility_mode", "collision_visibility_mode"), &TileMap::set_collision_visibility_mode);
 	ClassDB::bind_method(D_METHOD("get_collision_visibility_mode"), &TileMap::get_collision_visibility_mode);
-
-	ClassDB::bind_method(D_METHOD("set_navigation_visibility_mode", "navigation_visibility_mode"), &TileMap::set_navigation_visibility_mode);
-	ClassDB::bind_method(D_METHOD("get_navigation_visibility_mode"), &TileMap::get_navigation_visibility_mode);
+	ClassDB::bind_method(D_METHOD("get_coords_for_body_rid", "body"), &TileMap::get_coords_for_body_rid);
+	ClassDB::bind_method(D_METHOD("get_layer_for_body_rid", "body"), &TileMap::get_layer_for_body_rid);
+#endif // !_PHYSICS_DISABLED
 
 	ClassDB::bind_method(D_METHOD("set_cell", "layer", "coords", "source_id", "atlas_coords", "alternative_tile"), &TileMap::set_cell, DEFVAL(TileSet::INVALID_SOURCE), DEFVAL(TileSetSource::INVALID_ATLAS_COORDS), DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("erase_cell", "layer", "coords"), &TileMap::erase_cell);
@@ -941,9 +954,6 @@ void TileMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_cell_flipped_h", "layer", "coords", "use_proxies"), &TileMap::is_cell_flipped_h, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("is_cell_flipped_v", "layer", "coords", "use_proxies"), &TileMap::is_cell_flipped_v, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("is_cell_transposed", "layer", "coords", "use_proxies"), &TileMap::is_cell_transposed, DEFVAL(false));
-
-	ClassDB::bind_method(D_METHOD("get_coords_for_body_rid", "body"), &TileMap::get_coords_for_body_rid);
-	ClassDB::bind_method(D_METHOD("get_layer_for_body_rid", "body"), &TileMap::get_layer_for_body_rid);
 
 	ClassDB::bind_method(D_METHOD("get_pattern", "layer", "coords_array"), &TileMap::get_pattern);
 	ClassDB::bind_method(D_METHOD("map_pattern", "position_in_tilemap", "coords_in_pattern", "pattern"), &TileMap::map_pattern);
@@ -975,9 +985,13 @@ void TileMap::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "tile_set", PROPERTY_HINT_RESOURCE_TYPE, "TileSet"), "set_tileset", "get_tileset");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "rendering_quadrant_size", PROPERTY_HINT_RANGE, "1,128,1"), "set_rendering_quadrant_size", "get_rendering_quadrant_size");
+#ifndef _PHYSICS_DISABLED
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "collision_animatable"), "set_collision_animatable", "is_collision_animatable");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "collision_visibility_mode", PROPERTY_HINT_ENUM, "Default,Force Show,Force Hide"), "set_collision_visibility_mode", "get_collision_visibility_mode");
+#endif // !_PHYSICS_DISABLED
+#ifndef _NAVIGATION_DISABLED
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "navigation_visibility_mode", PROPERTY_HINT_ENUM, "Default,Force Show,Force Hide"), "set_navigation_visibility_mode", "get_navigation_visibility_mode");
+#endif // !_NAVIGATION_DISABLED
 
 	ADD_ARRAY("layers", "layer_");
 
@@ -1012,7 +1026,9 @@ TileMap::TileMap() {
 		base_property_helper.register_property(PropertyInfo(Variant::BOOL, "y_sort_enabled"), defaults->is_y_sort_enabled(), &TileMap::set_layer_y_sort_enabled, &TileMap::is_layer_y_sort_enabled);
 		base_property_helper.register_property(PropertyInfo(Variant::INT, "y_sort_origin", PROPERTY_HINT_NONE, "suffix:px"), defaults->get_y_sort_origin(), &TileMap::set_layer_y_sort_origin, &TileMap::get_layer_y_sort_origin);
 		base_property_helper.register_property(PropertyInfo(Variant::INT, "z_index"), defaults->get_z_index(), &TileMap::set_layer_z_index, &TileMap::get_layer_z_index);
+#ifndef _NAVIGATION_DISABLED
 		base_property_helper.register_property(PropertyInfo(Variant::BOOL, "navigation_enabled"), defaults->is_navigation_enabled(), &TileMap::set_layer_navigation_enabled, &TileMap::is_layer_navigation_enabled);
+#endif // !_NAVIGATION_DISABLED
 		base_property_helper.register_property(PropertyInfo(Variant::PACKED_INT32_ARRAY, "tile_data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), Vector<int>(), &TileMap::_set_layer_tile_data, &TileMap::_get_tile_map_data_using_compatibility_format);
 		PropertyListHelper::register_base_helper(&base_property_helper);
 

@@ -46,6 +46,7 @@
 #include "scene/gui/control.h"
 
 class ButtonGroup;
+class Timer;
 
 class BaseButton : public Control {
 	GDCLASS(BaseButton, Control);

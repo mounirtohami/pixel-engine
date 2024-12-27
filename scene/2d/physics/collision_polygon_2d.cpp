@@ -33,8 +33,8 @@
 #include "core/math/geometry_2d.h"
 #include "scene/2d/physics/area_2d.h"
 #include "scene/2d/physics/collision_object_2d.h"
-#include "scene/resources/2d/concave_polygon_shape_2d.h"
-#include "scene/resources/2d/convex_polygon_shape_2d.h"
+#include  "scene/resources/2d/physics/concave_polygon_shape_2d.h"
+#include "scene/resources/2d/physics/convex_polygon_shape_2d.h"
 
 void CollisionPolygon2D::_build_polygon() {
 	collision_object->shape_owner_clear_shapes(owner_id);

@@ -36,7 +36,7 @@
 #include "editor/multi_node_edit.h"
 #include "editor/plugins/node_3d_editor_plugin.h"
 #include "editor/themes/editor_scale.h"
-#include "scene/3d/navigation_region_3d.h"
+#include "scene/3d/navigation/navigation_region_3d.h"
 #include "scene/3d/physics/collision_shape_3d.h"
 #include "scene/3d/physics/static_body_3d.h"
 #include "scene/gui/aspect_ratio_container.h"
@@ -44,8 +44,8 @@
 #include "scene/gui/dialogs.h"
 #include "scene/gui/menu_button.h"
 #include "scene/gui/spin_box.h"
-#include "scene/resources/3d/concave_polygon_shape_3d.h"
-#include "scene/resources/3d/convex_polygon_shape_3d.h"
+#include "scene/resources/3d/physics/concave_polygon_shape_3d.h"
+#include "scene/resources/3d/physics/convex_polygon_shape_3d.h"
 #include "scene/resources/3d/primitive_meshes.h"
 
 void MeshInstance3DEditor::_node_removed(Node *p_node) {

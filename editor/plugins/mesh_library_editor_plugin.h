@@ -32,7 +32,7 @@
 #define MESH_LIBRARY_EDITOR_PLUGIN_H
 
 #include "editor/plugins/editor_plugin.h"
-#include "scene/resources/3d/mesh_library.h"
+#include "scene/resources/3d/physics/mesh_library.h"
 
 class EditorFileDialog;
 class ConfirmationDialog;

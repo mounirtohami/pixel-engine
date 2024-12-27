@@ -34,7 +34,9 @@
 #include "core/io/resource.h"
 #include "scene/resources/compositor.h"
 #include "scene/resources/environment.h"
+#ifndef _PHYSICS_DISABLED
 #include "servers/physics_server_3d.h"
+#endif // !_PHYSICS_DISABLED
 #include "servers/rendering_server.h"
 
 class CameraAttributes;
@@ -83,9 +85,9 @@ public:
 	Ref<Compositor> get_compositor() const;
 
 	_FORCE_INLINE_ const HashSet<Camera3D *> &get_cameras() const { return cameras; }
-
+#ifndef _PHYSICS_DISABLED
 	PhysicsDirectSpaceState3D *get_direct_space_state();
-
+#endif // !_PHYSICS_DISABLED
 	World3D();
 	~World3D();
 };

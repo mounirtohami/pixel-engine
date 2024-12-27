@@ -37,15 +37,18 @@
 #include "core/templates/rb_set.h"
 #include "scene/2d/light_occluder_2d.h"
 #include "scene/main/canvas_item.h"
-#include "scene/resources/2d/convex_polygon_shape_2d.h"
-#include "scene/resources/2d/navigation_polygon.h"
 #include "scene/resources/image_texture.h"
 #include "scene/resources/packed_scene.h"
-#include "scene/resources/physics_material.h"
-
+#ifndef _NAVIGATION_DISABLED
+#include "scene/resources/2d/navigation/navigation_polygon.h"
+#endif // !_NAVIGATION_DISABLED
+#ifndef _PHYSICS_DISABLED
+#include "scene/resources/2d/physics/convex_polygon_shape_2d.h"
+#include "scene/resources/3d/physics/physics_material.h"
+#endif // !PHYSIC_DISABLED
 #ifndef DISABLE_DEPRECATED
 #include "scene/resources/shader.h"
-#endif
+#endif // !DISABLE_DEPRECATED
 
 class TileMap;
 class TileSetSource;
@@ -55,8 +58,12 @@ class TileData;
 // Forward-declare the plugins.
 class TileSetPlugin;
 class TileSetPluginAtlasRendering;
+#ifndef _PHYSICS_DISABLED
 class TileSetPluginAtlasPhysics;
+#endif // !_PHYSICS_DISABLED
+#ifndef _NAVIGATION_DISABLED
 class TileSetPluginAtlasNavigation;
+#endif // !_NAVIGATION_DISABLED
 
 union TileMapCell {
 	struct {
@@ -322,7 +329,7 @@ private:
 	Ref<ArrayMesh> tile_lines_mesh;
 	Ref<ArrayMesh> tile_filled_mesh;
 	mutable bool tile_meshes_dirty = true;
-
+#ifndef _PHYSICS_DISABLED
 	// Physics
 	struct PhysicsLayer {
 		uint32_t collision_layer = 1;
@@ -331,7 +338,7 @@ private:
 		Ref<PhysicsMaterial> physics_material;
 	};
 	Vector<PhysicsLayer> physics_layers;
-
+#endif // !_PHYSICS_DISABLED
 	// Terrains
 	struct Terrain {
 		String name;
@@ -351,11 +358,13 @@ private:
 	bool terrains_cache_dirty = true;
 	void _update_terrains_cache();
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	struct NavigationLayer {
 		uint32_t layers = 1;
 	};
 	Vector<NavigationLayer> navigation_layers;
+#endif // !_NAVIGATION_DISABLED
 
 	// CustomData
 	struct CustomDataLayer {
@@ -439,7 +448,7 @@ public:
 	int get_occlusion_layer_light_mask(int p_layer_index) const;
 	void set_occlusion_layer_sdf_collision(int p_layer_index, bool p_sdf_collision);
 	bool get_occlusion_layer_sdf_collision(int p_layer_index) const;
-
+#ifndef _PHYSICS_DISABLED
 	// Physics
 	int get_physics_layers_count() const;
 	void add_physics_layer(int p_index = -1);
@@ -453,7 +462,7 @@ public:
 	real_t get_physics_layer_collision_priority(int p_layer_index) const;
 	void set_physics_layer_physics_material(int p_layer_index, Ref<PhysicsMaterial> p_physics_material);
 	Ref<PhysicsMaterial> get_physics_layer_physics_material(int p_layer_index) const;
-
+#endif // !_PHYSICS_DISABLED
 	// Terrain sets
 	int get_terrain_sets_count() const;
 	void add_terrain_set(int p_index = -1);
@@ -474,6 +483,7 @@ public:
 	bool is_valid_terrain_peering_bit_for_mode(TileSet::TerrainMode p_terrain_mode, TileSet::CellNeighbor p_peering_bit) const;
 	bool is_valid_terrain_peering_bit(int p_terrain_set, TileSet::CellNeighbor p_peering_bit) const;
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	int get_navigation_layers_count() const;
 	void add_navigation_layer(int p_index = -1);
@@ -483,6 +493,7 @@ public:
 	uint32_t get_navigation_layer_layers(int p_layer_index) const;
 	void set_navigation_layer_layer_value(int p_layer_index, int p_layer_number, bool p_value);
 	bool get_navigation_layer_layer_value(int p_layer_index, int p_layer_number) const;
+#endif // !_NAVIGATION_DISABLED
 
 	// Custom data
 	int get_custom_data_layers_count() const;
@@ -578,18 +589,22 @@ public:
 	virtual void add_occlusion_layer(int p_index) {}
 	virtual void move_occlusion_layer(int p_from_index, int p_to_pos) {}
 	virtual void remove_occlusion_layer(int p_index) {}
+#ifndef _PHYSICS_DISABLED
 	virtual void add_physics_layer(int p_index) {}
 	virtual void move_physics_layer(int p_from_index, int p_to_pos) {}
 	virtual void remove_physics_layer(int p_index) {}
+#endif // !_PHYSICS_DISABLED
 	virtual void add_terrain_set(int p_index) {}
 	virtual void move_terrain_set(int p_from_index, int p_to_pos) {}
 	virtual void remove_terrain_set(int p_index) {}
 	virtual void add_terrain(int p_terrain_set, int p_index) {}
 	virtual void move_terrain(int p_terrain_set, int p_from_index, int p_to_pos) {}
 	virtual void remove_terrain(int p_terrain_set, int p_index) {}
+#ifndef _NAVIGATION_DISABLED
 	virtual void add_navigation_layer(int p_index) {}
 	virtual void move_navigation_layer(int p_from_index, int p_to_pos) {}
 	virtual void remove_navigation_layer(int p_index) {}
+#endif // !_NAVIGATION_DISABLED
 	virtual void add_custom_data_layer(int p_index) {}
 	virtual void move_custom_data_layer(int p_from_index, int p_to_pos) {}
 	virtual void remove_custom_data_layer(int p_index) {}
@@ -685,18 +700,22 @@ public:
 	virtual void add_occlusion_layer(int p_index) override;
 	virtual void move_occlusion_layer(int p_from_index, int p_to_pos) override;
 	virtual void remove_occlusion_layer(int p_index) override;
+#ifndef _PHYSICS_DISABLED
 	virtual void add_physics_layer(int p_index) override;
 	virtual void move_physics_layer(int p_from_index, int p_to_pos) override;
 	virtual void remove_physics_layer(int p_index) override;
+#endif // !_PHYSICS_DISABLED
 	virtual void add_terrain_set(int p_index) override;
 	virtual void move_terrain_set(int p_from_index, int p_to_pos) override;
 	virtual void remove_terrain_set(int p_index) override;
 	virtual void add_terrain(int p_terrain_set, int p_index) override;
 	virtual void move_terrain(int p_terrain_set, int p_from_index, int p_to_pos) override;
 	virtual void remove_terrain(int p_terrain_set, int p_index) override;
+#ifndef _NAVIGATION_DISABLED
 	virtual void add_navigation_layer(int p_index) override;
 	virtual void move_navigation_layer(int p_from_index, int p_to_pos) override;
 	virtual void remove_navigation_layer(int p_index) override;
+#endif // !_NAVIGATION_DISABLED
 	virtual void add_custom_data_layer(int p_index) override;
 	virtual void move_custom_data_layer(int p_from_index, int p_to_pos) override;
 	virtual void remove_custom_data_layer(int p_index) override;
@@ -851,7 +870,7 @@ private:
 		Vector<PolygonOccluderTileData> polygons;
 	};
 	Vector<OcclusionLayerTileData> occluders;
-
+#ifndef _PHYSICS_DISABLED
 	// Physics
 	struct PhysicsLayerTileData {
 		struct PolygonShapeTileData {
@@ -868,18 +887,20 @@ private:
 	};
 	Vector<PhysicsLayerTileData> physics;
 	// TODO add support for areas.
-
+#endif // !_PHYSICS_DISABLED
 	// Terrain
 	int terrain_set = -1;
 	int terrain = -1;
 	int terrain_peering_bits[16] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	struct NavigationLayerTileData {
 		Ref<NavigationPolygon> navigation_polygon;
 		mutable HashMap<int, Ref<NavigationPolygon>> transformed_navigation_polygon;
 	};
 	Vector<NavigationLayerTileData> navigation;
+#endif // !_NAVIGATION_DISABLED
 
 	// Misc
 	double probability = 1.0;
@@ -907,18 +928,22 @@ public:
 	void add_occlusion_layer(int p_index);
 	void move_occlusion_layer(int p_from_index, int p_to_pos);
 	void remove_occlusion_layer(int p_index);
+#ifndef _PHYSICS_DISABLED
 	void add_physics_layer(int p_index);
 	void move_physics_layer(int p_from_index, int p_to_pos);
 	void remove_physics_layer(int p_index);
+#endif // !_PHYSICS_DISABLED
 	void add_terrain_set(int p_index);
 	void move_terrain_set(int p_from_index, int p_to_pos);
 	void remove_terrain_set(int p_index);
 	void add_terrain(int p_terrain_set, int p_index);
 	void move_terrain(int p_terrain_set, int p_from_index, int p_to_pos);
 	void remove_terrain(int p_terrain_set, int p_index);
+#ifndef _NAVIGATION_DISABLED
 	void add_navigation_layer(int p_index);
 	void move_navigation_layer(int p_from_index, int p_to_pos);
 	void remove_navigation_layer(int p_index);
+#endif // !_NAVIGATION_DISABLED
 	void add_custom_data_layer(int p_index);
 	void move_custom_data_layer(int p_from_index, int p_to_pos);
 	void remove_custom_data_layer(int p_index);
@@ -958,7 +983,7 @@ public:
 	void remove_occluder_polygon(int p_layer_id, int p_polygon_index);
 	void set_occluder_polygon(int p_layer_id, int p_polygon_index, const Ref<OccluderPolygon2D> &p_occluder_polygon);
 	Ref<OccluderPolygon2D> get_occluder_polygon(int p_layer_id, int p_polygon_index, bool p_flip_h = false, bool p_flip_v = false, bool p_transpose = false) const;
-
+#ifndef _PHYSICS_DISABLED
 	// Physics
 	void set_constant_linear_velocity(int p_layer_id, const Vector2 &p_velocity);
 	Vector2 get_constant_linear_velocity(int p_layer_id) const;
@@ -976,7 +1001,7 @@ public:
 	float get_collision_polygon_one_way_margin(int p_layer_id, int p_polygon_index) const;
 	int get_collision_polygon_shapes_count(int p_layer_id, int p_polygon_index) const;
 	Ref<ConvexPolygonShape2D> get_collision_polygon_shape(int p_layer_id, int p_polygon_index, int shape_index, bool p_flip_h = false, bool p_flip_v = false, bool p_transpose = false) const;
-
+#endif // !_PHYSICS_DISABLED
 	// Terrain
 	void set_terrain_set(int p_terrain_id);
 	int get_terrain_set() const;
@@ -988,9 +1013,11 @@ public:
 
 	TileSet::TerrainsPattern get_terrains_pattern() const; // Not exposed.
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	void set_navigation_polygon(int p_layer_id, Ref<NavigationPolygon> p_navigation_polygon);
 	Ref<NavigationPolygon> get_navigation_polygon(int p_layer_id, bool p_flip_h = false, bool p_flip_v = false, bool p_transpose = false) const;
+#endif // !_NAVIGATION_DISABLED
 
 	// Misc
 	void set_probability(float p_probability);

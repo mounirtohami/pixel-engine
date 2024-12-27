@@ -234,7 +234,11 @@ opts.Add(BoolVariable("vsproj", "Generate a Visual Studio solution", False))
 opts.Add("vsproj_name", "Name of the Visual Studio solution", "godot")
 opts.Add("import_env_vars", "A comma-separated list of environment variables to copy from the outer environment.", "")
 opts.Add(BoolVariable("disable_3d", "Disable 3D nodes for a smaller executable", False))
+opts.Add(BoolVariable("disable_navigation", "Disable 2D and 3D navigation for a smaller executable", False))
+opts.Add(BoolVariable("disable_physics", "Disable 2D and 3D physics for a smaller executable", False))
+opts.Add(BoolVariable("disable_visual_shader", "Disable visual shader for a smaller executable", False))
 opts.Add(BoolVariable("disable_advanced_gui", "Disable advanced GUI nodes and behaviors", False))
+opts.Add(BoolVariable("disable_graph", "Disable graph nodes for a smaller executable", False))
 opts.Add("build_profile", "Path to a file containing a feature build profile", "")
 opts.Add(BoolVariable("modules_enabled_by_default", "If no, disable all modules except ones explicitly enabled", True))
 opts.Add(BoolVariable("no_editor_splash", "Don't use the custom splash screen for the editor", True))
@@ -1000,6 +1004,31 @@ if env["disable_3d"]:
         Exit(255)
     else:
         env.Append(CPPDEFINES=["_3D_DISABLED"])
+
+if env["disable_physics"]:
+    if env.editor_build:
+        print_error("Build option `disable_physics=yes` cannot be used for editor builds, only for export template builds.")
+        Exit(255)
+    else:
+        env.Append(CPPDEFINES=["_PHYSICS_DISABLED"])
+
+if env["disable_navigation"]:
+    if env.editor_build:
+        print_error("Build option `disable_navigation=yes` cannot be used for editor builds, only for export template builds.")
+        Exit(255)
+    else:
+        env.Append(CPPDEFINES=["_NAVIGATION_DISABLED"])
+
+if env["disable_visual_shader"]:
+    if env.editor_build:
+        print_error(
+            "Build option `disable_visual_shader=yes` cannot be used for editor builds, "
+            "only for export template builds."
+        )
+        Exit(255)
+    else:
+        env.Append(CPPDEFINES=["_VISUAL_SHADER_DISABLED"])
+
 if env["disable_advanced_gui"]:
     if env.editor_build:
         print_error(
@@ -1009,6 +1038,17 @@ if env["disable_advanced_gui"]:
         Exit(255)
     else:
         env.Append(CPPDEFINES=["ADVANCED_GUI_DISABLED"])
+
+if env["disable_graph"]:
+    if env.editor_build:
+        print_error(
+            "Build option `disable_graph=yes` cannot be used for editor builds, "
+            "only for export template builds."
+        )
+        Exit(255)
+    else:
+        env.Append(CPPDEFINES=["_GRAPH_DISABLED"])
+
 if env["minizip"]:
     env.Append(CPPDEFINES=["MINIZIP_ENABLED"])
 if env["brotli"]:

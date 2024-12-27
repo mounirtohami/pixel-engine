@@ -37,7 +37,9 @@
 #include "core/templates/rb_set.h"
 #include "scene/gui/control.h"
 #include "scene/resources/image_texture.h"
+#ifndef _NAVIGATION_DISABLED
 #include "servers/navigation_server_2d.h"
+#endif // !_NAVIGATION_DISABLED
 
 /////////////////////////////// TileMapPattern //////////////////////////////////////
 
@@ -635,7 +637,7 @@ bool TileSet::get_occlusion_layer_sdf_collision(int p_layer_index) const {
 	ERR_FAIL_INDEX_V(p_layer_index, occlusion_layers.size(), false);
 	return occlusion_layers[p_layer_index].sdf_collision;
 }
-
+#ifndef _PHYSICS_DISABLED
 int TileSet::get_physics_layers_count() const {
 	return physics_layers.size();
 }
@@ -719,7 +721,7 @@ Ref<PhysicsMaterial> TileSet::get_physics_layer_physics_material(int p_layer_ind
 	ERR_FAIL_INDEX_V(p_layer_index, physics_layers.size(), Ref<PhysicsMaterial>());
 	return physics_layers[p_layer_index].physics_material;
 }
-
+#endif // !_PHYSICS
 // Terrains
 int TileSet::get_terrain_sets_count() const {
 	return terrain_sets.size();
@@ -964,6 +966,8 @@ bool TileSet::is_valid_terrain_peering_bit(int p_terrain_set, TileSet::CellNeigh
 	return is_valid_terrain_peering_bit_for_mode(terrain_mode, p_peering_bit);
 }
 
+#ifndef _NAVIGATION_DISABLED
+
 // Navigation
 int TileSet::get_navigation_layers_count() const {
 	return navigation_layers.size();
@@ -1038,6 +1042,7 @@ bool TileSet::get_navigation_layer_layer_value(int p_layer_index, int p_layer_nu
 
 	return get_navigation_layer_layers(p_layer_index) & (1 << (p_layer_number - 1));
 }
+#endif // !_NAVIGATION_DISABLED
 
 // Custom data.
 int TileSet::get_custom_data_layers_count() const {
@@ -3234,9 +3239,10 @@ void TileSet::reset_state() {
 	tile_filled_mesh.instantiate();
 	tile_meshes_dirty = true;
 
+#ifndef _PHYSICS_DISABLED
 	// Physics
 	physics_layers.clear();
-
+#endif
 	// Terrains
 	terrain_sets.clear();
 	terrain_meshes.clear();
@@ -3244,8 +3250,10 @@ void TileSet::reset_state() {
 	per_terrain_pattern_tiles.clear();
 	terrains_cache_dirty = true;
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	navigation_layers.clear();
+#endif // !_NAVIGATION_DISABLED
 
 	custom_data_layers.clear();
 	custom_data_layers_by_name.clear();
@@ -3458,6 +3466,7 @@ void TileSet::_compatibility_conversion() {
 						tile_data->add_occluder_polygon(0);
 						tile_data->set_occluder_polygon(0, 0, occluder);
 					}
+#ifndef _NAVIGATION_DISABLED
 					if (ctd->navigation.is_valid()) {
 						if (get_navigation_layers_count() < 1) {
 							add_navigation_layer();
@@ -3470,9 +3479,10 @@ void TileSet::_compatibility_conversion() {
 						navigation->set_vertices(vertices);
 						tile_data->set_navigation_polygon(0, navigation);
 					}
+#endif // !_NAVIGATION_DISABLED
 
 					tile_data->set_z_index(ctd->z_index);
-
+#ifndef _PHYSICS_DISABLED
 					// Add the shapes.
 					if (ctd->shapes.size() > 0) {
 						if (get_physics_layers_count() < 1) {
@@ -3496,6 +3506,7 @@ void TileSet::_compatibility_conversion() {
 							}
 						}
 					}
+#endif // !_PHYSICS_DISABLED
 				}
 				// Update the size count.
 				if (!compatibility_size_count.has(ctd->region.get_size())) {
@@ -3573,6 +3584,7 @@ void TileSet::_compatibility_conversion() {
 								tile_data->add_occluder_polygon(0);
 								tile_data->set_occluder_polygon(0, 0, occluder);
 							}
+#ifndef _NAVIGATION_DISABLED
 							if (ctd->autotile_navpoly_map.has(coords)) {
 								if (get_navigation_layers_count() < 1) {
 									add_navigation_layer();
@@ -3585,13 +3597,14 @@ void TileSet::_compatibility_conversion() {
 								navigation->set_vertices(vertices);
 								tile_data->set_navigation_polygon(0, navigation);
 							}
+#endif // !_NAVIGATION_DISABLED
 							if (ctd->autotile_priority_map.has(coords)) {
 								tile_data->set_probability(ctd->autotile_priority_map[coords]);
 							}
 							if (ctd->autotile_z_index_map.has(coords)) {
 								tile_data->set_z_index(ctd->autotile_z_index_map[coords]);
 							}
-
+#ifndef _PHYSICS_DISABLED
 							// Add the shapes.
 							if (ctd->shapes.size() > 0) {
 								if (get_physics_layers_count() < 1) {
@@ -3615,7 +3628,7 @@ void TileSet::_compatibility_conversion() {
 									}
 								}
 							}
-
+#endif // !_PHYSICS_DISABLED
 							// -- TODO: handle --
 							// Those are offset for the whole atlas, they are likely useless for the atlases, but might make sense for single tiles.
 							// texture offset
@@ -3844,6 +3857,7 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 			}
 		} else if (what == "occluder") {
 			ctd->occluder = p_value;
+#ifndef _NAVIGATION_DISABLED
 		} else if (what == "navigation") {
 			ctd->navigation = p_value;
 
@@ -3861,7 +3875,7 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 		} else if (what == "navigation_offset") {
 		}
 		*/
-
+#endif // !_NAVIGATION_DISABLED
 		} else if (what == "z_index") {
 			ctd->z_index = p_value;
 
@@ -3893,6 +3907,7 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 				set_occlusion_layer_sdf_collision(index, p_value);
 				return true;
 			}
+#ifndef _PHYSICS_DISABLED
 		} else if (components.size() == 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
 			// Physics layers.
 			int index = components[0].trim_prefix("physics_layer_").to_int();
@@ -3926,6 +3941,7 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 				set_physics_layer_physics_material(index, physics_material);
 				return true;
 			}
+#endif // !_PHYSICS_DISABLED
 		} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int()) {
 			// Terrains.
 			int terrain_set_index = components[0].trim_prefix("terrain_set_").to_int();
@@ -3961,6 +3977,7 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 					return true;
 				}
 			}
+#ifndef _NAVIGATION_DISABLED
 		} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
 			// Navigation layers.
 			int index = components[0].trim_prefix("navigation_layer_").to_int();
@@ -3973,6 +3990,7 @@ bool TileSet::_set(const StringName &p_name, const Variant &p_value) {
 				set_navigation_layer_layers(index, p_value);
 				return true;
 			}
+#endif // !_NAVIGATION_DISABLED
 		} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_int()) {
 			// Custom data layers.
 			int index = components[0].trim_prefix("custom_data_layer_").to_int();
@@ -4057,6 +4075,7 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = get_occlusion_layer_sdf_collision(index);
 			return true;
 		}
+#ifndef _PHYSICS_DISABLED
 	} else if (components.size() == 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
 		// Physics layers.
 		int index = components[0].trim_prefix("physics_layer_").to_int();
@@ -4076,6 +4095,7 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = get_physics_layer_physics_material(index);
 			return true;
 		}
+#endif // !_PHYSICS_DISABLED
 	} else if (components.size() >= 2 && components[0].begins_with("terrain_set_") && components[0].trim_prefix("terrain_set_").is_valid_int()) {
 		// Terrains.
 		int terrain_set_index = components[0].trim_prefix("terrain_set_").to_int();
@@ -4098,6 +4118,7 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 				return true;
 			}
 		}
+#ifndef _NAVIGATION_DISABLED
 	} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
 		// navigation layers.
 		int index = components[0].trim_prefix("navigation_layer_").to_int();
@@ -4108,6 +4129,7 @@ bool TileSet::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = get_navigation_layer_layers(index);
 			return true;
 		}
+#endif // !_NAVIGATION_DISABLED
 	} else if (components.size() == 2 && components[0].begins_with("custom_data_layer_") && components[0].trim_prefix("custom_data_layer_").is_valid_int()) {
 		// Custom data layers.
 		int index = components[0].trim_prefix("custom_data_layer_").to_int();
@@ -4185,6 +4207,7 @@ void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 		p_list->push_back(property_info);
 	}
 
+#ifndef _PHYSICS_DISABLED
 	// Physics.
 	p_list->push_back(PropertyInfo(Variant::NIL, GNAME("Physics", ""), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
 	for (int i = 0; i < physics_layers.size(); i++) {
@@ -4211,6 +4234,7 @@ void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 		}
 		p_list->push_back(property_info);
 	}
+#endif // !_PHYSICS_DISABLED
 
 	// Terrains.
 	p_list->push_back(PropertyInfo(Variant::NIL, GNAME("Terrains", ""), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
@@ -4223,11 +4247,13 @@ void TileSet::_get_property_list(List<PropertyInfo> *p_list) const {
 		}
 	}
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation.
 	p_list->push_back(PropertyInfo(Variant::NIL, GNAME("Navigation", ""), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
 	for (int i = 0; i < navigation_layers.size(); i++) {
 		p_list->push_back(PropertyInfo(Variant::INT, vformat("navigation_layer_%d/layers", i), PROPERTY_HINT_LAYERS_2D_NAVIGATION));
 	}
+#endif // !_NAVIGATION_DISABLED
 
 	// Custom data.
 	String argt = "Any";
@@ -4305,7 +4331,7 @@ void TileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_occlusion_layer_light_mask", "layer_index"), &TileSet::get_occlusion_layer_light_mask);
 	ClassDB::bind_method(D_METHOD("set_occlusion_layer_sdf_collision", "layer_index", "sdf_collision"), &TileSet::set_occlusion_layer_sdf_collision);
 	ClassDB::bind_method(D_METHOD("get_occlusion_layer_sdf_collision", "layer_index"), &TileSet::get_occlusion_layer_sdf_collision);
-
+#ifndef _PHYSICS_DISABLED
 	// Physics
 	ClassDB::bind_method(D_METHOD("get_physics_layers_count"), &TileSet::get_physics_layers_count);
 	ClassDB::bind_method(D_METHOD("add_physics_layer", "to_position"), &TileSet::add_physics_layer, DEFVAL(-1));
@@ -4319,7 +4345,7 @@ void TileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_physics_layer_collision_priority", "layer_index"), &TileSet::get_physics_layer_collision_priority);
 	ClassDB::bind_method(D_METHOD("set_physics_layer_physics_material", "layer_index", "physics_material"), &TileSet::set_physics_layer_physics_material);
 	ClassDB::bind_method(D_METHOD("get_physics_layer_physics_material", "layer_index"), &TileSet::get_physics_layer_physics_material);
-
+#endif // !_PHYSICS_DISABLED
 	// Terrains
 	ClassDB::bind_method(D_METHOD("get_terrain_sets_count"), &TileSet::get_terrain_sets_count);
 	ClassDB::bind_method(D_METHOD("add_terrain_set", "to_position"), &TileSet::add_terrain_set, DEFVAL(-1));
@@ -4337,6 +4363,7 @@ void TileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_terrain_color", "terrain_set", "terrain_index", "color"), &TileSet::set_terrain_color);
 	ClassDB::bind_method(D_METHOD("get_terrain_color", "terrain_set", "terrain_index"), &TileSet::get_terrain_color);
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	ClassDB::bind_method(D_METHOD("get_navigation_layers_count"), &TileSet::get_navigation_layers_count);
 	ClassDB::bind_method(D_METHOD("add_navigation_layer", "to_position"), &TileSet::add_navigation_layer, DEFVAL(-1));
@@ -4346,6 +4373,7 @@ void TileSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_navigation_layer_layers", "layer_index"), &TileSet::get_navigation_layer_layers);
 	ClassDB::bind_method(D_METHOD("set_navigation_layer_layer_value", "layer_index", "layer_number", "value"), &TileSet::set_navigation_layer_layer_value);
 	ClassDB::bind_method(D_METHOD("get_navigation_layer_layer_value", "layer_index", "layer_number"), &TileSet::get_navigation_layer_layer_value);
+#endif // !_NAVIGATION_DISABLED
 
 	// Custom data
 	ClassDB::bind_method(D_METHOD("get_custom_data_layers_count"), &TileSet::get_custom_data_layers_count);
@@ -4390,9 +4418,13 @@ void TileSet::_bind_methods() {
 	ADD_ARRAY("occlusion_layers", "occlusion_layer_");
 
 	ADD_GROUP("", "");
+#ifndef _PHYSICS_DISABLED
 	ADD_ARRAY("physics_layers", "physics_layer_");
+#endif // !_PHYSICS_DISABLED
 	ADD_ARRAY("terrain_sets", "terrain_set_");
+#ifndef _NAVIGATION_DISABLED
 	ADD_ARRAY("navigation_layers", "navigation_layer_");
+#endif // !_NAVIGATION_DISABLED
 	ADD_ARRAY("custom_data_layers", "custom_data_layer_");
 
 	// -- Enum binding --
@@ -4525,7 +4557,7 @@ void TileSetAtlasSource::remove_occlusion_layer(int p_index) {
 		}
 	}
 }
-
+#ifndef _PHYSICS_DISABLED
 void TileSetAtlasSource::add_physics_layer(int p_to_pos) {
 	for (KeyValue<Vector2i, TileAlternativesData> E_tile : tiles) {
 		for (KeyValue<int, TileData *> E_alternative : E_tile.value.alternatives) {
@@ -4549,6 +4581,7 @@ void TileSetAtlasSource::remove_physics_layer(int p_index) {
 		}
 	}
 }
+#endif // !_PHYSICS_DISABLED
 
 void TileSetAtlasSource::add_terrain_set(int p_to_pos) {
 	for (KeyValue<Vector2i, TileAlternativesData> E_tile : tiles) {
@@ -4598,6 +4631,7 @@ void TileSetAtlasSource::remove_terrain(int p_terrain_set, int p_index) {
 	}
 }
 
+#ifndef _NAVIGATION_DISABLED
 void TileSetAtlasSource::add_navigation_layer(int p_to_pos) {
 	for (KeyValue<Vector2i, TileAlternativesData> E_tile : tiles) {
 		for (KeyValue<int, TileData *> E_alternative : E_tile.value.alternatives) {
@@ -4621,6 +4655,7 @@ void TileSetAtlasSource::remove_navigation_layer(int p_index) {
 		}
 	}
 }
+#endif // !_NAVIGATION_DISABLED
 
 void TileSetAtlasSource::add_custom_data_layer(int p_to_pos) {
 	for (KeyValue<Vector2i, TileAlternativesData> E_tile : tiles) {
@@ -5964,13 +5999,18 @@ void TileData::notify_tile_data_properties_should_change() {
 	}
 
 	occluders.resize(tile_set->get_occlusion_layers_count());
+#ifndef _PHYSICS_DISABLED
 	physics.resize(tile_set->get_physics_layers_count());
+#endif // !_PHYSICS_DISABLED
+
 	for (int bit_index = 0; bit_index < 16; bit_index++) {
 		if (terrain_set < 0 || terrain_peering_bits[bit_index] >= tile_set->get_terrains_count(terrain_set)) {
 			terrain_peering_bits[bit_index] = -1;
 		}
 	}
+#ifndef _NAVIGATION_DISABLED
 	navigation.resize(tile_set->get_navigation_layers_count());
+#endif // !_NAVIGATION_DISABLED
 
 	// Convert custom data to the new type.
 	custom_data.resize(tile_set->get_custom_data_layers_count());
@@ -6011,7 +6051,7 @@ void TileData::remove_occlusion_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, occluders.size());
 	occluders.remove_at(p_index);
 }
-
+#ifndef _PHYSICS_DISABLED
 void TileData::add_physics_layer(int p_to_pos) {
 	if (p_to_pos < 0) {
 		p_to_pos = physics.size();
@@ -6031,7 +6071,7 @@ void TileData::remove_physics_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, physics.size());
 	physics.remove_at(p_index);
 }
-
+#endif // !_PHYSICS_DISABLED
 void TileData::add_terrain_set(int p_to_pos) {
 	if (p_to_pos >= 0 && p_to_pos <= terrain_set) {
 		terrain_set += 1;
@@ -6107,6 +6147,7 @@ void TileData::remove_terrain(int p_terrain_set, int p_index) {
 	}
 }
 
+#ifndef _NAVIGATION_DISABLED
 void TileData::add_navigation_layer(int p_to_pos) {
 	if (p_to_pos < 0) {
 		p_to_pos = navigation.size();
@@ -6126,6 +6167,7 @@ void TileData::remove_navigation_layer(int p_index) {
 	ERR_FAIL_INDEX(p_index, navigation.size());
 	navigation.remove_at(p_index);
 }
+#endif // !_NAVIGATION_DISABLEDh
 
 void TileData::add_custom_data_layer(int p_to_pos) {
 	if (p_to_pos < 0) {
@@ -6171,13 +6213,17 @@ TileData *TileData::duplicate() {
 	output->z_index = z_index;
 	output->y_sort_origin = y_sort_origin;
 	output->occluders = occluders;
+#ifndef _PHYSICS_DISABLED
 	// Physics
 	output->physics = physics;
+#endif // !_PHYSICS_DISABLED
 	// Terrain
 	output->terrain_set = -1;
 	memcpy(output->terrain_peering_bits, terrain_peering_bits, 16 * sizeof(int));
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	output->navigation = navigation;
+#endif // !_NAVIGATION_DISABLED
 	// Misc
 	output->probability = probability;
 	// Custom data
@@ -6341,7 +6387,7 @@ Ref<OccluderPolygon2D> TileData::get_occluder_polygon(int p_layer_id, int p_poly
 		return I->value;
 	}
 }
-
+#ifndef _PHYSICS_DISABLED
 // Physics
 void TileData::set_constant_linear_velocity(int p_layer_id, const Vector2 &p_velocity) {
 	ERR_FAIL_INDEX(p_layer_id, physics.size());
@@ -6490,7 +6536,7 @@ Ref<ConvexPolygonShape2D> TileData::get_collision_polygon_shape(int p_layer_id, 
 		return I->value[shape_index];
 	}
 }
-
+#endif // !_PHYSICS_DISABLED
 // Terrain
 void TileData::set_terrain_set(int p_terrain_set) {
 	ERR_FAIL_COND(p_terrain_set < -1);
@@ -6563,6 +6609,7 @@ TileSet::TerrainsPattern TileData::get_terrains_pattern() const {
 	return output;
 }
 
+#ifndef _NAVIGATION_DISABLED
 // Navigation
 void TileData::set_navigation_polygon(int p_layer_id, Ref<NavigationPolygon> p_navigation_polygon) {
 	ERR_FAIL_INDEX(p_layer_id, navigation.size());
@@ -6610,6 +6657,7 @@ Ref<NavigationPolygon> TileData::get_navigation_polygon(int p_layer_id, bool p_f
 		return I->value;
 	}
 }
+#endif // !_NAVIGATION_DISABLED
 
 // Misc
 void TileData::set_probability(float p_probability) {
@@ -6733,6 +6781,7 @@ bool TileData::_set(const StringName &p_name, const Variant &p_value) {
 				return true;
 			}
 		}
+#ifndef _PHYSICS_DISABLED
 	} else if (components.size() >= 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
 		// Physics layers.
 		int layer_index = components[0].trim_prefix("physics_layer_").to_int();
@@ -6788,6 +6837,8 @@ bool TileData::_set(const StringName &p_name, const Variant &p_value) {
 				return true;
 			}
 		}
+#endif // !_PHYSICS_DISABLED
+#ifndef _NAVIGATION_DISABLED
 	} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
 		// Navigation layers.
 		int layer_index = components[0].trim_prefix("navigation_layer_").to_int();
@@ -6805,6 +6856,7 @@ bool TileData::_set(const StringName &p_name, const Variant &p_value) {
 			set_navigation_polygon(layer_index, polygon);
 			return true;
 		}
+#endif // !_NAVIGATION_DISABLED
 	} else if (components.size() == 2 && components[0] == "terrains_peering_bit") {
 		// Terrains.
 		for (int i = 0; i < TileSet::CELL_NEIGHBOR_MAX; i++) {
@@ -6877,6 +6929,7 @@ bool TileData::_get(const StringName &p_name, Variant &r_ret) const {
 					return true;
 				}
 			}
+#ifndef _PHYSICS_DISABLED
 		} else if (components.size() >= 2 && components[0].begins_with("physics_layer_") && components[0].trim_prefix("physics_layer_").is_valid_int()) {
 			// Physics layers.
 			int layer_index = components[0].trim_prefix("physics_layer_").to_int();
@@ -6913,6 +6966,7 @@ bool TileData::_get(const StringName &p_name, Variant &r_ret) const {
 					return true;
 				}
 			}
+#endif // !_PHYSICS_DISABLED
 		} else if (components.size() == 2 && components[0] == "terrains_peering_bit") {
 			// Terrains.
 			for (int i = 0; i < TileSet::CELL_NEIGHBOR_MAX; i++) {
@@ -6922,6 +6976,7 @@ bool TileData::_get(const StringName &p_name, Variant &r_ret) const {
 				}
 			}
 			return false;
+#ifndef _NAVIGATION_DISABLED
 		} else if (components.size() == 2 && components[0].begins_with("navigation_layer_") && components[0].trim_prefix("navigation_layer_").is_valid_int()) {
 			// Occlusion layers.
 			int layer_index = components[0].trim_prefix("navigation_layer_").to_int();
@@ -6933,6 +6988,7 @@ bool TileData::_get(const StringName &p_name, Variant &r_ret) const {
 				r_ret = get_navigation_polygon(layer_index);
 				return true;
 			}
+#endif // !_NAVIGATION_DISABLED
 		} else if (components.size() == 1 && components[0].begins_with("custom_data_") && components[0].trim_prefix("custom_data_").is_valid_int()) {
 			// Custom data layers.
 			int layer_index = components[0].trim_prefix("custom_data_").to_int();
@@ -6965,7 +7021,7 @@ void TileData::_get_property_list(List<PropertyInfo> *p_list) const {
 				p_list->push_back(property_info);
 			}
 		}
-
+#ifndef _PHYSICS_DISABLED
 		// Physics layers.
 		p_list->push_back(PropertyInfo(Variant::NIL, GNAME("Physics", ""), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
 		for (int i = 0; i < physics.size(); i++) {
@@ -7008,7 +7064,7 @@ void TileData::_get_property_list(List<PropertyInfo> *p_list) const {
 				p_list->push_back(property_info);
 			}
 		}
-
+#endif // !_PHYSICS_DISABLED
 		// Terrain data
 		if (terrain_set >= 0) {
 			p_list->push_back(PropertyInfo(Variant::NIL, GNAME("Terrains", ""), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
@@ -7024,6 +7080,7 @@ void TileData::_get_property_list(List<PropertyInfo> *p_list) const {
 			}
 		}
 
+#ifndef _NAVIGATION_DISABLED
 		// Navigation layers.
 		p_list->push_back(PropertyInfo(Variant::NIL, GNAME("Navigation", ""), PROPERTY_HINT_NONE, "", PROPERTY_USAGE_GROUP));
 		for (int i = 0; i < navigation.size(); i++) {
@@ -7033,6 +7090,7 @@ void TileData::_get_property_list(List<PropertyInfo> *p_list) const {
 			}
 			p_list->push_back(property_info);
 		}
+#endif // !_NAVIGATION_DISABLED
 
 		// Custom data layers.
 		p_list->push_back(PropertyInfo(Variant::NIL, GNAME("Custom Data", "custom_data_"), PROPERTY_HINT_NONE, "custom_data_", PROPERTY_USAGE_GROUP));
@@ -7079,7 +7137,7 @@ void TileData::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_occluder", "layer_id", "occluder_polygon"), &TileData::set_occluder);
 	ClassDB::bind_method(D_METHOD("get_occluder", "layer_id", "flip_h", "flip_v", "transpose"), &TileData::get_occluder, DEFVAL(false), DEFVAL(false), DEFVAL(false));
 #endif // DISABLE_DEPRECATED
-
+#ifndef _PHYSICS_DISABLED
 	// Physics.
 	ClassDB::bind_method(D_METHOD("set_constant_linear_velocity", "layer_id", "velocity"), &TileData::set_constant_linear_velocity);
 	ClassDB::bind_method(D_METHOD("get_constant_linear_velocity", "layer_id"), &TileData::get_constant_linear_velocity);
@@ -7095,7 +7153,7 @@ void TileData::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_collision_polygon_one_way", "layer_id", "polygon_index"), &TileData::is_collision_polygon_one_way);
 	ClassDB::bind_method(D_METHOD("set_collision_polygon_one_way_margin", "layer_id", "polygon_index", "one_way_margin"), &TileData::set_collision_polygon_one_way_margin);
 	ClassDB::bind_method(D_METHOD("get_collision_polygon_one_way_margin", "layer_id", "polygon_index"), &TileData::get_collision_polygon_one_way_margin);
-
+#endif // !_PHYSICS_DISABLED
 	// Terrain
 	ClassDB::bind_method(D_METHOD("set_terrain_set", "terrain_set"), &TileData::set_terrain_set);
 	ClassDB::bind_method(D_METHOD("get_terrain_set"), &TileData::get_terrain_set);
@@ -7105,10 +7163,11 @@ void TileData::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_terrain_peering_bit", "peering_bit"), &TileData::get_terrain_peering_bit);
 	ClassDB::bind_method(D_METHOD("is_valid_terrain_peering_bit", "peering_bit"), &TileData::is_valid_terrain_peering_bit);
 
+#ifndef _NAVIGATION_DISABLED
 	// Navigation
 	ClassDB::bind_method(D_METHOD("set_navigation_polygon", "layer_id", "navigation_polygon"), &TileData::set_navigation_polygon);
 	ClassDB::bind_method(D_METHOD("get_navigation_polygon", "layer_id", "flip_h", "flip_v", "transpose"), &TileData::get_navigation_polygon, DEFVAL(false), DEFVAL(false), DEFVAL(false));
-
+#endif // !_NAVIGATION_DISABLED
 	// Misc.
 	ClassDB::bind_method(D_METHOD("set_probability", "probability"), &TileData::set_probability);
 	ClassDB::bind_method(D_METHOD("get_probability"), &TileData::get_probability);

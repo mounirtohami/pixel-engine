@@ -34,13 +34,13 @@
 
 #include "core/math/convex_hull.h"
 #include "scene/3d/physics/area_3d.h"
-#include "scene/resources/3d/box_shape_3d.h"
-#include "scene/resources/3d/capsule_shape_3d.h"
-#include "scene/resources/3d/concave_polygon_shape_3d.h"
-#include "scene/resources/3d/convex_polygon_shape_3d.h"
-#include "scene/resources/3d/cylinder_shape_3d.h"
+#include "scene/resources/3d/physics/box_shape_3d.h"
+#include "scene/resources/3d/physics/capsule_shape_3d.h"
+#include "scene/resources/3d/physics/concave_polygon_shape_3d.h"
+#include "scene/resources/3d/physics/convex_polygon_shape_3d.h"
+#include "scene/resources/3d/physics/cylinder_shape_3d.h"
 #include "scene/resources/3d/importer_mesh.h"
-#include "scene/resources/3d/sphere_shape_3d.h"
+#include "scene/resources/3d/physics/sphere_shape_3d.h"
 
 void GLTFPhysicsShape::_bind_methods() {
 	ClassDB::bind_static_method("GLTFPhysicsShape", D_METHOD("from_node", "shape_node"), &GLTFPhysicsShape::from_node);

@@ -66,9 +66,13 @@ private:
 	// Properties.
 	Ref<TileSet> tile_set;
 	int rendering_quadrant_size = 16;
+#ifndef _PHYSICS_DISABLED
 	bool collision_animatable = false;
 	VisibilityMode collision_visibility_mode = VISIBILITY_MODE_DEFAULT;
+#endif // !_PHYSICS_DISABLED
+#ifndef _NAVIGATION_DISABLED
 	VisibilityMode navigation_visibility_mode = VISIBILITY_MODE_DEFAULT;
+#endif // !_NAVIGATION_DISABLED
 
 	// Layers.
 	LocalVector<TileMapLayer *> layers;
@@ -143,20 +147,23 @@ public:
 	int get_layer_y_sort_origin(int p_layer) const;
 	void set_layer_z_index(int p_layer, int p_z_index);
 	int get_layer_z_index(int p_layer) const;
+
+#ifndef _NAVIGATION_DISABLED
 	void set_layer_navigation_enabled(int p_layer, bool p_enabled);
 	bool is_layer_navigation_enabled(int p_layer) const;
 	void set_layer_navigation_map(int p_layer, RID p_map);
 	RID get_layer_navigation_map(int p_layer) const;
+	void set_navigation_visibility_mode(VisibilityMode p_show_navigation);
+	VisibilityMode get_navigation_visibility_mode() const;
+#endif // !_NAVIGATION_DISABLED
 
+#ifndef _PHYSICS_DISABLED
 	void set_collision_animatable(bool p_collision_animatable);
 	bool is_collision_animatable() const;
-
 	// Debug visibility modes.
 	void set_collision_visibility_mode(VisibilityMode p_show_collision);
 	VisibilityMode get_collision_visibility_mode() const;
-
-	void set_navigation_visibility_mode(VisibilityMode p_show_navigation);
-	VisibilityMode get_navigation_visibility_mode() const;
+#endif // !_PHYSICS_DISABLED
 
 	// Cells accessors.
 	void set_cell(int p_layer, const Vector2i &p_coords, int p_source_id = TileSet::INVALID_SOURCE, const Vector2i p_atlas_coords = TileSetSource::INVALID_ATLAS_COORDS, int p_alternative_tile = 0);
@@ -207,10 +214,12 @@ public:
 	virtual void set_texture_filter(CanvasItem::TextureFilter p_texture_filter) override;
 	virtual void set_texture_repeat(CanvasItem::TextureRepeat p_texture_repeat) override;
 
+#ifndef _PHYSICS_DISABLED
 	// For finding tiles from collision.
 	Vector2i get_coords_for_body_rid(RID p_physics_body);
 	// For getting their layers as well.
 	int get_layer_for_body_rid(RID p_physics_body);
+#endif // !_PHYSICS_DISABLED
 
 	// Fixing and clearing methods.
 	void fix_invalid_tiles();

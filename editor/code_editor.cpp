@@ -42,6 +42,7 @@
 #include "scene/gui/line_edit.h"
 #include "scene/gui/menu_button.h"
 #include "scene/gui/separator.h"
+#include "scene/gui/texture_button.h"
 #include "scene/resources/font.h"
 
 void GotoLinePopup::popup_find_line(CodeTextEditor *p_text_editor) {

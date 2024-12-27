@@ -33,7 +33,7 @@
 
 #include "scene/3d/physics/collision_object_3d.h"
 #include "scene/3d/physics/kinematic_collision_3d.h"
-#include "scene/resources/physics_material.h"
+#include "scene/resources/3d/physics/physics_material.h"
 #include "servers/physics_server_3d.h"
 
 class PhysicsBody3D : public CollisionObject3D {

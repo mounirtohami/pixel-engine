@@ -32,7 +32,7 @@
 #define NAVIGATION_LINK_2D_EDITOR_PLUGIN_H
 
 #include "editor/plugins/editor_plugin.h"
-#include "scene/2d/navigation_link_2d.h"
+#include "scene/2d/navigation/navigation_link_2d.h"
 
 class CanvasItemEditor;
 

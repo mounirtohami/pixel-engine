@@ -34,8 +34,8 @@
 #include "core/object/class_db.h"
 #include "core/templates/rid.h"
 
-#include "scene/resources/3d/navigation_mesh_source_geometry_data_3d.h"
-#include "scene/resources/navigation_mesh.h"
+#include "scene/resources/3d/navigation/navigation_mesh_source_geometry_data_3d.h"
+#include "scene/resources/3d/navigation/navigation_mesh.h"
 #include "servers/navigation/navigation_path_query_parameters_3d.h"
 #include "servers/navigation/navigation_path_query_result_3d.h"
 

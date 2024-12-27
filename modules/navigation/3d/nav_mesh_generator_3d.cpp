@@ -37,7 +37,7 @@
 #include "core/os/thread.h"
 #include "scene/3d/mesh_instance_3d.h"
 #include "scene/3d/multimesh_instance_3d.h"
-#include "scene/3d/navigation_obstacle_3d.h"
+#include "scene/3d/navigation/navigation_obstacle_3d.h"
 #include "scene/3d/physics/static_body_3d.h"
 #include "scene/resources/3d/box_shape_3d.h"
 #include "scene/resources/3d/capsule_shape_3d.h"
@@ -45,11 +45,12 @@
 #include "scene/resources/3d/convex_polygon_shape_3d.h"
 #include "scene/resources/3d/cylinder_shape_3d.h"
 #include "scene/resources/3d/height_map_shape_3d.h"
+#include "scene/resources/3d/navigation/navigation_mesh.h"
 #include "scene/resources/3d/navigation_mesh_source_geometry_data_3d.h"
+#include "scene/resources/3d/physics/shape_3d.h"
+#include "scene/resources/3d/physics/sphere_shape_3d.h"
 #include "scene/resources/3d/primitive_meshes.h"
-#include "scene/resources/3d/shape_3d.h"
-#include "scene/resources/3d/sphere_shape_3d.h"
-#include "scene/resources/navigation_mesh.h"
+#include "scene/resources/3d/world_boundary_shape_3d.h"
 
 #include "modules/modules_enabled.gen.h" // For csg, gridmap.
 

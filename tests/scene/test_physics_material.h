@@ -31,7 +31,7 @@
 #ifndef TEST_PHYSICS_MATERIAL_H
 #define TEST_PHYSICS_MATERIAL_H
 
-#include "scene/resources/physics_material.h"
+#include "scene/resources/3d/physics/physics_material.h"
 #include "tests/test_macros.h"
 
 namespace TestPhysics_material {

@@ -34,10 +34,10 @@
 #include "core/templates/pair.h"
 #include "scene/resources/surface_tool.h"
 
-#ifndef _3D_DISABLED
-#include "scene/resources/3d/concave_polygon_shape_3d.h"
-#include "scene/resources/3d/convex_polygon_shape_3d.h"
-#endif // _3D_DISABLED
+#if !defined(_3D_DISABLED) || !defined(_PHYSICS_DISABLED)
+#include "scene/resources/3d/physics/concave_polygon_shape_3d.h"
+#include "scene/resources/3d/physics/convex_polygon_shape_3d.h"
+#endif // !defined(_3D_DISABLED) || !defined(_PHYSICS_DISABLED)
 
 void MeshConvexDecompositionSettings::set_max_concavity(real_t p_max_concavity) {
 	max_concavity = CLAMP(p_max_concavity, 0.001, 1.0);

@@ -31,10 +31,10 @@
 #ifndef TEST_NAVIGATION_AGENT_2D_H
 #define TEST_NAVIGATION_AGENT_2D_H
 
-#include "scene/2d/navigation_agent_2d.h"
+#include "scene/2d/navigation/navigation_agent_2d.h"
 #include "scene/2d/node_2d.h"
 #include "scene/main/window.h"
-#include "scene/resources/world_2d.h"
+#include "scene/resources/2d/world_2d.h"
 
 #include "tests/test_macros.h"
 

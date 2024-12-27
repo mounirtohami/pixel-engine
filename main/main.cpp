@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #include "main.h"
 
 #include "core/config/project_settings.h"
@@ -72,16 +83,19 @@
 #include "servers/display_server.h"
 #include "servers/movie_writer/movie_writer.h"
 #include "servers/movie_writer/movie_writer_mjpeg.h"
+#ifndef _NAVIGATION_DISABLED
+#include "servers/navigation_server_2d.h"
+#include "servers/navigation_server_2d_dummy.h"
 #include "servers/navigation_server_3d.h"
 #include "servers/navigation_server_3d_dummy.h"
+#endif // !_NAVIGATION_DISABLED
 #include "servers/register_server_types.h"
 #include "servers/rendering/rendering_server_default.h"
 #include "servers/text/text_server_dummy.h"
 #include "servers/text_server.h"
 
 // 2D
-#include "servers/navigation_server_2d.h"
-#include "servers/navigation_server_2d_dummy.h"
+#ifndef _PHYSICS_DISABLED
 #include "servers/physics_server_2d.h"
 #include "servers/physics_server_2d_dummy.h"
 
@@ -90,6 +104,7 @@
 #include "servers/physics_server_3d_dummy.h"
 #include "servers/xr_server.h"
 #endif // _3D_DISABLED
+#endif // !_PHYSICS_DISABLED
 
 #ifdef TESTS_ENABLED
 #include "tests/test_main.h"
@@ -164,15 +179,19 @@ static DisplayServer *display_server = nullptr;
 static RenderingServer *rendering_server = nullptr;
 static TextServerManager *tsman = nullptr;
 static ThemeDB *theme_db = nullptr;
+#ifndef _NAVIGATION_DISABLED
 static NavigationServer2D *navigation_server_2d = nullptr;
+static NavigationServer3D *navigation_server_3d = nullptr;
+#endif // !_NAVIGATION_DISABLED
+#ifndef _PHYSICS_DISABLED
 static PhysicsServer2DManager *physics_server_2d_manager = nullptr;
 static PhysicsServer2D *physics_server_2d = nullptr;
-static NavigationServer3D *navigation_server_3d = nullptr;
 #ifndef _3D_DISABLED
 static PhysicsServer3DManager *physics_server_3d_manager = nullptr;
 static PhysicsServer3D *physics_server_3d = nullptr;
 static XRServer *xr_server = nullptr;
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
+#endif // !_PHYSICS_DISABLED
 // We error out if setup2() doesn't turn this true
 static bool _start_success = false;
 
@@ -318,6 +337,7 @@ static Vector<String> get_files_with_extension(const String &p_root, const Strin
 }
 #endif
 
+#ifndef _PHYSICS_DISABLED
 // FIXME: Could maybe be moved to have less code in main.cpp.
 void initialize_physics() {
 #ifndef _3D_DISABLED
@@ -338,7 +358,7 @@ void initialize_physics() {
 	// Should be impossible, but make sure it's not null.
 	ERR_FAIL_NULL_MSG(physics_server_3d, "Failed to initialize PhysicsServer3D.");
 	physics_server_3d->init();
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 
 	// 2D Physics server
 	physics_server_2d = PhysicsServer2DManager::get_singleton()->new_server(
@@ -363,11 +383,12 @@ void finalize_physics() {
 #ifndef _3D_DISABLED
 	physics_server_3d->finish();
 	memdelete(physics_server_3d);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 
 	physics_server_2d->finish();
 	memdelete(physics_server_2d);
 }
+#endif // !_PHYSICS_DISABLED
 
 void finalize_display() {
 	rendering_server->finish();
@@ -376,6 +397,7 @@ void finalize_display() {
 	memdelete(display_server);
 }
 
+#ifndef _NAVIGATION_DISABLED
 void initialize_navigation_server() {
 	ERR_FAIL_COND(navigation_server_3d != nullptr);
 	ERR_FAIL_COND(navigation_server_2d != nullptr);
@@ -413,6 +435,7 @@ void finalize_navigation_server() {
 	memdelete(navigation_server_2d);
 	navigation_server_2d = nullptr;
 }
+#endif // !_NAVIGATION_DISABLED
 
 void initialize_theme_db() {
 	theme_db = memnew(ThemeDB);
@@ -737,11 +760,12 @@ Error Main::test_setup() {
 		tsman->add_interface(ts);
 	}
 
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 	physics_server_3d_manager = memnew(PhysicsServer3DManager);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 	physics_server_2d_manager = memnew(PhysicsServer2DManager);
-
+#endif // !_PHYSICS_DISABLED
 	// From `Main::setup2()`.
 	register_early_core_singletons();
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
@@ -792,7 +816,9 @@ Error Main::test_setup() {
 	// Theme needs modules to be initialized so that sub-resources can be loaded.
 	theme_db->initialize_theme_noproject();
 
+#ifndef _NAVIGATION_DISABLED
 	initialize_navigation_server();
+#endif // !_NAVIGATION_DISABLED
 
 	ERR_FAIL_COND_V(TextServerManager::get_singleton()->get_interface_count() == 0, ERR_CANT_CREATE);
 
@@ -854,7 +880,9 @@ void Main::test_cleanup() {
 
 	finalize_theme_db();
 
+#ifndef _NAVIGATION_DISABLED
 	finalize_navigation_server();
+#endif // !_NAVIGATION_DISABLED
 
 	GDExtensionManager::get_singleton()->deinitialize_extensions(GDExtension::INITIALIZATION_LEVEL_SERVERS);
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_SERVERS);
@@ -872,14 +900,16 @@ void Main::test_cleanup() {
 	if (tsman) {
 		memdelete(tsman);
 	}
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 	if (physics_server_3d_manager) {
 		memdelete(physics_server_3d_manager);
 	}
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 	if (physics_server_2d_manager) {
 		memdelete(physics_server_2d_manager);
 	}
+#endif // !_PHYSICS_DISABLED
 	if (globals) {
 		memdelete(globals);
 	}
@@ -1875,7 +1905,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	if (globals->setup(project_path, main_pack, upwards, editor) == OK) {
 #ifdef TOOLS_ENABLED
 		found_project = true;
-#endif
+#endif // TOOLS_ENABLED
 	} else {
 #ifdef TOOLS_ENABLED
 		editor = false;
@@ -2028,14 +2058,14 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	if (main_args.size() == 0 && String(GLOBAL_GET("application/run/main_scene")) == "") {
 #ifdef TOOLS_ENABLED
 		if (!editor && !project_manager) {
-#endif
+#endif // TOOLS_ENABLED
 			const String error_msg = "Error: Can't run project: no main scene defined in the project.\n";
 			OS::get_singleton()->print("%s", error_msg.utf8().get_data());
 			OS::get_singleton()->alert(error_msg);
 			goto error;
 #ifdef TOOLS_ENABLED
 		}
-#endif
+#endif // TOOLS_ENABLED
 	}
 
 	if (editor || project_manager) {
@@ -2937,11 +2967,12 @@ Error Main::setup2(bool p_show_boot_logo) {
 		ts.instantiate();
 		tsman->add_interface(ts);
 	}
-
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 	physics_server_3d_manager = memnew(PhysicsServer3DManager);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 	physics_server_2d_manager = memnew(PhysicsServer2DManager);
+#endif // !_PHYSICS_DISABLED
 
 	register_server_types();
 	{
@@ -3058,15 +3089,16 @@ Error Main::setup2(bool p_show_boot_logo) {
 			if (tsman) {
 				memdelete(tsman);
 			}
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 			if (physics_server_3d_manager) {
 				memdelete(physics_server_3d_manager);
 			}
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 			if (physics_server_2d_manager) {
 				memdelete(physics_server_2d_manager);
 			}
-
+#endif // !_PHYSICS_DISABLED
 			return err;
 		}
 
@@ -3409,7 +3441,9 @@ Error Main::setup2(bool p_show_boot_logo) {
 		extensions.push_back("cs");
 	}
 	extensions.push_back("gdshader");
+#ifdef TOOLS_ENABLED
 	GLOBAL_DEF_NOVAL(PropertyInfo(Variant::PACKED_STRING_ARRAY, "editor/script/search_in_file_extensions"), extensions); // Note: should be defined after Scene level modules init to see .NET.
+#endif // TOOLS_ENABLED
 
 	OS::get_singleton()->benchmark_end_measure("Startup", "Scene");
 
@@ -3455,13 +3489,17 @@ Error Main::setup2(bool p_show_boot_logo) {
 
 	camera_server = CameraServer::create();
 
+#ifndef _PHYSICS_DISABLED
 	MAIN_PRINT("Main: Load Physics");
 
 	initialize_physics();
+#endif // !_PHYSICS_DISABLED
 
+#ifndef _NAVIGATION_DISABLED
 	MAIN_PRINT("Main: Load Navigation");
 
 	initialize_navigation_server();
+#endif // !_NAVIGATION_DISABLED
 
 	register_server_singletons();
 
@@ -3970,12 +4008,15 @@ int Main::start() {
 	SceneTree *sml = Object::cast_to<SceneTree>(main_loop);
 	if (sml) {
 #ifdef DEBUG_ENABLED
+#ifndef _PHYSICS_DISABLED
 		if (debug_collisions) {
 			sml->set_debug_collisions_hint(true);
 		}
+#endif // !_PHYSICS_DISABLED
 		if (debug_paths) {
 			sml->set_debug_paths_hint(true);
 		}
+#ifndef _NAVIGATION_DISABLED
 		if (debug_navigation) {
 			sml->set_debug_navigation_hint(true);
 			NavigationServer3D::get_singleton()->set_debug_navigation_enabled(true);
@@ -3987,6 +4028,7 @@ int Main::start() {
 			NavigationServer3D::get_singleton()->set_active(true);
 			NavigationServer3D::get_singleton()->set_debug_enabled(true);
 		}
+#endif // !_NAVIGATION_DISABLED
 		if (debug_canvas_item_redraw) {
 			RenderingServer::get_singleton()->canvas_item_set_debug_redraw(true);
 		}
@@ -4410,7 +4452,9 @@ bool Main::iteration() {
 
 	uint64_t physics_process_ticks = 0;
 	uint64_t process_ticks = 0;
+#ifndef _NAVIGATION_DISABLED
 	uint64_t navigation_process_ticks = 0;
+#endif // !_NAVIGATION_DISABLED
 
 	frame += ticks_elapsed;
 
@@ -4429,8 +4473,10 @@ bool Main::iteration() {
 	XRServer::get_singleton()->_process();
 #endif // _3D_DISABLED
 
+#ifndef _NAVIGATION_DISABLED
 	NavigationServer2D::get_singleton()->sync();
 	NavigationServer3D::get_singleton()->sync();
+#endif // !_NAVIGATION_DISABLED
 
 	for (int iters = 0; iters < advance.physics_steps; ++iters) {
 		if (Input::get_singleton()->is_agile_input_event_flushing()) {
@@ -4446,11 +4492,11 @@ bool Main::iteration() {
 		// by the physics server, otherwise the current and previous transforms
 		// may be the same, and no interpolation takes place.
 		OS::get_singleton()->get_main_loop()->iteration_prepare();
-
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 		PhysicsServer3D::get_singleton()->sync();
 		PhysicsServer3D::get_singleton()->flush_queries();
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 
 		PhysicsServer2D::get_singleton()->sync();
 		PhysicsServer2D::get_singleton()->flush_queries();
@@ -4458,30 +4504,35 @@ bool Main::iteration() {
 		if (OS::get_singleton()->get_main_loop()->physics_process(physics_step * time_scale)) {
 #ifndef _3D_DISABLED
 			PhysicsServer3D::get_singleton()->end_sync();
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 			PhysicsServer2D::get_singleton()->end_sync();
 
 			Engine::get_singleton()->_in_physics = false;
 			exit = true;
 			break;
 		}
+#endif // !_PHYSICS_DISABLED
 
+#ifndef _NAVIGATION_DISABLED
 		uint64_t navigation_begin = OS::get_singleton()->get_ticks_usec();
 
 		NavigationServer3D::get_singleton()->process(physics_step * time_scale);
 
 		navigation_process_ticks = MAX(navigation_process_ticks, OS::get_singleton()->get_ticks_usec() - navigation_begin); // keep the largest one for reference
 		navigation_process_max = MAX(OS::get_singleton()->get_ticks_usec() - navigation_begin, navigation_process_max);
+#endif // !_NAVIGATION_DISABLED
 
 		message_queue->flush();
 
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 		PhysicsServer3D::get_singleton()->end_sync();
 		PhysicsServer3D::get_singleton()->step(physics_step * time_scale);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 
 		PhysicsServer2D::get_singleton()->end_sync();
 		PhysicsServer2D::get_singleton()->step(physics_step * time_scale);
+#endif // !_PHYSICS_DISABLED
 
 		message_queue->flush();
 
@@ -4708,8 +4759,12 @@ void Main::cleanup(bool p_force) {
 	finalize_theme_db();
 
 	// Before deinitializing server extensions, finalize servers which may be loaded as extensions.
+#ifndef _NAVIGATION_DISABLED
 	finalize_navigation_server();
+#endif // !_NAVIGATION_DISABLED
+#ifndef _PHYSICS_DISABLED
 	finalize_physics();
+#endif // !_PHYSICS_DISABLED
 
 	GDExtensionManager::get_singleton()->deinitialize_extensions(GDExtension::INITIALIZATION_LEVEL_SERVERS);
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_SERVERS);
@@ -4755,14 +4810,16 @@ void Main::cleanup(bool p_force) {
 	if (tsman) {
 		memdelete(tsman);
 	}
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 	if (physics_server_3d_manager) {
 		memdelete(physics_server_3d_manager);
 	}
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 	if (physics_server_2d_manager) {
 		memdelete(physics_server_2d_manager);
 	}
+#endif // !_PHYSICS_DISABLED
 	if (globals) {
 		memdelete(globals);
 	}

@@ -79,14 +79,13 @@
 #include "text/text_server_extension.h"
 #include "text_server.h"
 
+#ifndef _PHYSICS_DISABLED
 // 2D physics and navigation.
-#include "navigation_server_2d.h"
 #include "physics_server_2d.h"
 #include "physics_server_2d_dummy.h"
 #include "servers/extensions/physics_server_2d_extension.h"
 
 // 3D physics and navigation (3D navigation is needed for 2D).
-#include "navigation_server_3d.h"
 #ifndef _3D_DISABLED
 #include "physics_server_3d.h"
 #include "physics_server_3d_dummy.h"
@@ -99,10 +98,17 @@
 #include "xr/xr_interface_extension.h"
 #include "xr/xr_positional_tracker.h"
 #include "xr_server.h"
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
+#endif // !_PHYSICS_DISABLED
+
+#ifndef _NAVIGATION_DISABLED
+#include "navigation_server_2d.h"
+#include "navigation_server_3d.h"
+#endif // !_NAVIGATION_DISABLED
 
 ShaderTypes *shader_types = nullptr;
 
+#ifndef _PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 static PhysicsServer3D *_create_dummy_physics_server_3d() {
 	return memnew(PhysicsServer3DDummy);
@@ -112,6 +118,7 @@ static PhysicsServer3D *_create_dummy_physics_server_3d() {
 static PhysicsServer2D *_create_dummy_physics_server_2d() {
 	return memnew(PhysicsServer2DDummy);
 }
+#endif // !_PHYSICS_DISABLED
 
 static bool has_server_feature_callback(const String &p_feature) {
 	if (RenderingServer::get_singleton()) {
@@ -248,6 +255,7 @@ void register_server_types() {
 
 	ServersDebugger::initialize();
 
+#ifndef _PHYSICS_DISABLED
 	// Physics 2D
 	GDREGISTER_CLASS(PhysicsServer2DManager);
 	Engine::get_singleton()->add_singleton(Engine::Singleton("PhysicsServer2DManager", PhysicsServer2DManager::get_singleton(), "PhysicsServer2DManager"));
@@ -273,10 +281,6 @@ void register_server_types() {
 	GLOBAL_DEF(PropertyInfo(Variant::STRING, PhysicsServer2DManager::setting_property_name, PROPERTY_HINT_ENUM, "DEFAULT"), "DEFAULT");
 
 	PhysicsServer2DManager::get_singleton()->register_server("Dummy", callable_mp_static(_create_dummy_physics_server_2d));
-
-	GDREGISTER_ABSTRACT_CLASS(NavigationServer2D);
-	GDREGISTER_CLASS(NavigationPathQueryParameters2D);
-	GDREGISTER_CLASS(NavigationPathQueryResult2D);
 
 #ifndef _3D_DISABLED
 	// Physics 3D
@@ -319,10 +323,17 @@ void register_server_types() {
 	GDREGISTER_CLASS(XRServer);
 	GDREGISTER_ABSTRACT_CLASS(XRTracker);
 #endif // _3D_DISABLED
+#endif // !_PHYSICS_DISABLED
+
+#ifndef _NAVIGATION_DISABLED
+	GDREGISTER_ABSTRACT_CLASS(NavigationServer2D);
+	GDREGISTER_CLASS(NavigationPathQueryParameters2D);
+	GDREGISTER_CLASS(NavigationPathQueryResult2D);
 
 	GDREGISTER_ABSTRACT_CLASS(NavigationServer3D);
 	GDREGISTER_CLASS(NavigationPathQueryParameters3D);
 	GDREGISTER_CLASS(NavigationPathQueryResult3D);
+#endif // !_NAVIGATION_DISABLED
 
 	writer_mjpeg = memnew(MovieWriterMJPEG);
 	MovieWriter::add_writer(writer_mjpeg);
@@ -351,15 +362,18 @@ void register_server_singletons() {
 	Engine::get_singleton()->add_singleton(Engine::Singleton("CameraServer", CameraServer::get_singleton(), "CameraServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("DisplayServer", DisplayServer::get_singleton(), "DisplayServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("NativeMenu", NativeMenu::get_singleton(), "NativeMenu"));
+#ifndef _NAVIGATION_DISABLED
 	Engine::get_singleton()->add_singleton(Engine::Singleton("NavigationServer2D", NavigationServer2D::get_singleton(), "NavigationServer2D"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("NavigationServer3D", NavigationServer3D::get_singleton(), "NavigationServer3D"));
+#endif // !_NAVIGATION_DISABLED
 	Engine::get_singleton()->add_singleton(Engine::Singleton("RenderingServer", RenderingServer::get_singleton(), "RenderingServer"));
-
+#ifndef _PHYSICS_DISABLED
 	Engine::get_singleton()->add_singleton(Engine::Singleton("PhysicsServer2D", PhysicsServer2D::get_singleton(), "PhysicsServer2D"));
 #ifndef _3D_DISABLED
 	Engine::get_singleton()->add_singleton(Engine::Singleton("PhysicsServer3D", PhysicsServer3D::get_singleton(), "PhysicsServer3D"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("XRServer", XRServer::get_singleton(), "XRServer"));
 #endif // _3D_DISABLED
+#endif // !_PHYSICS_DISABLED
 
 	OS::get_singleton()->benchmark_end_measure("Servers", "Register Singletons");
 }

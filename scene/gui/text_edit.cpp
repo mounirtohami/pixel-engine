@@ -40,6 +40,9 @@
 #include "core/string/string_builder.h"
 #include "core/string/translation_server.h"
 #include "scene/gui/label.h"
+#include "scene/gui/popup_menu.h"
+#include "scene/gui/scroll_bar.h"
+#include "scene/main/timer.h"
 #include "scene/main/window.h"
 #include "scene/theme/theme_db.h"
 

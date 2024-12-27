@@ -36,13 +36,17 @@
 #include "core/templates/sort_array.h"
 #include "scene/2d/audio_listener_2d.h"
 #include "scene/2d/camera_2d.h"
+#ifndef _PHYSICS_DISABLED
 #include "scene/2d/physics/collision_object_2d.h"
+#ifndef _3D_DISABLED
+#include "scene/3d/physics/collision_object_3d.h"
+#endif // !_3D_DISABLED
+#endif // !_PHYSICS_DISABLED
 #ifndef _3D_DISABLED
 #include "scene/3d/audio_listener_3d.h"
 #include "scene/3d/camera_3d.h"
-#include "scene/3d/physics/collision_object_3d.h"
 #include "scene/3d/world_environment.h"
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 #include "scene/gui/control.h"
 #include "scene/gui/label.h"
 #include "scene/gui/popup.h"
@@ -50,9 +54,9 @@
 #include "scene/gui/subviewport_container.h"
 #include "scene/main/canvas_layer.h"
 #include "scene/main/window.h"
+#include "scene/resources/2d/world_2d.h"
 #include "scene/resources/mesh.h"
 #include "scene/resources/text_line.h"
-#include "scene/resources/world_2d.h"
 #include "servers/audio_server.h"
 #include "servers/rendering/rendering_server_globals.h"
 
@@ -535,6 +539,7 @@ void Viewport::_notification(int p_what) {
 
 			add_to_group("_viewports");
 			if (get_tree()->is_debugging_collisions_hint()) {
+#ifndef _PHYSICS_DISABLED
 				PhysicsServer2D::get_singleton()->space_set_debug_contacts(find_world_2d()->get_space(), get_tree()->get_collision_debug_contact_count());
 				contact_2d_debug = RenderingServer::get_singleton()->canvas_item_create();
 				RenderingServer::get_singleton()->canvas_item_set_parent(contact_2d_debug, current_canvas);
@@ -548,8 +553,9 @@ void Viewport::_notification(int p_what) {
 				RenderingServer::get_singleton()->instance_set_base(contact_3d_debug_instance, contact_3d_debug_multimesh);
 				RenderingServer::get_singleton()->instance_set_scenario(contact_3d_debug_instance, find_world_3d()->get_scenario());
 				RenderingServer::get_singleton()->instance_geometry_set_flag(contact_3d_debug_instance, RS::INSTANCE_FLAG_DRAW_NEXT_FRAME_IF_VISIBLE, true);
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 				set_physics_process_internal(true);
+#endif // !_PHYSICS_DISABLED
 			}
 		} break;
 
@@ -611,7 +617,7 @@ void Viewport::_notification(int p_what) {
 		case NOTIFICATION_PATH_RENAMED: {
 			_update_viewport_path();
 		} break;
-
+#ifndef _PHYSICS_DISABLED
 		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
 			if (!get_tree()) {
 				return;
@@ -642,8 +648,9 @@ void Viewport::_notification(int p_what) {
 					RS::get_singleton()->multimesh_instance_set_transform(contact_3d_debug_multimesh, i, point_transform);
 				}
 			}
-#endif // _3D_DISABLED
+#endif // !_3D_DISABLED
 		} break;
+#endif // !_PHYSICS_DISABLED
 
 		case NOTIFICATION_VP_MOUSE_ENTER: {
 			gui.mouse_in_viewport = true;
@@ -651,7 +658,9 @@ void Viewport::_notification(int p_what) {
 
 		case NOTIFICATION_VP_MOUSE_EXIT: {
 			gui.mouse_in_viewport = false;
+#ifndef _PHYSICS_DISABLED
 			_drop_physics_mouseover();
+#endif // !_PHYSICS_DISABLED
 			// When the mouse exits the viewport, we don't want to end
 			// mouse_focus, because, for example, we want to continue
 			// dragging a scrollbar even if the mouse has left the viewport.
@@ -659,7 +668,9 @@ void Viewport::_notification(int p_what) {
 
 		case NOTIFICATION_WM_WINDOW_FOCUS_OUT: {
 			_gui_cancel_tooltip();
+#ifndef _PHYSICS_DISABLED
 			_drop_physics_mouseover();
+#endif // !_PHYSICS_DISABLED
 			_drop_mouse_focus();
 			// When the window focus changes, we want to end mouse_focus, but
 			// not the mouse_over. Note: The OS will trigger a separate mouse
@@ -676,6 +687,7 @@ void Viewport::_notification(int p_what) {
 	}
 }
 
+#ifndef _PHYSICS_DISABLED
 void Viewport::_process_picking() {
 	if (!is_inside_tree()) {
 		return;
@@ -969,6 +981,7 @@ void Viewport::_process_picking() {
 #endif // _3D_DISABLED
 	}
 }
+#endif // !_PHYSICS_DISABLED
 
 RID Viewport::get_viewport_rid() const {
 	ERR_READ_THREAD_GUARD_V(RID());
@@ -2553,6 +2566,7 @@ void Viewport::_drop_mouse_focus() {
 	}
 }
 
+#ifndef _PHYSICS_DISABLED
 void Viewport::_drop_physics_mouseover(bool p_paused_only) {
 	_cleanup_mouseover_colliders(true, p_paused_only);
 
@@ -2572,6 +2586,7 @@ void Viewport::_drop_physics_mouseover(bool p_paused_only) {
 	}
 #endif // _3D_DISABLED
 }
+#endif // !_PHYSICS_DISABLED
 
 void Viewport::_gui_grab_click_focus(Control *p_control) {
 	gui.mouse_click_grabber = p_control;
@@ -3007,8 +3022,10 @@ void Viewport::_update_mouse_over(Vector2 p_pos) {
 			if (swrect_border.has_point(p_pos)) {
 				if (gui.mouse_over) {
 					_drop_mouse_over();
+#ifndef _PHYSICS_DISABLED
 				} else if (!gui.subwindow_over) {
 					_drop_physics_mouseover();
+#endif // !_PHYSICS_DISABLED
 				}
 				if (swrect.has_point(p_pos)) {
 					if (sw != gui.subwindow_over) {
@@ -3076,8 +3093,10 @@ void Viewport::_update_mouse_over(Vector2 p_pos) {
 		if (gui.mouse_over || !gui.mouse_over_hierarchy.is_empty()) {
 			// Send Mouse Exit Self and Mouse Exit notifications.
 			_drop_mouse_over(common_ancestor);
+#ifndef _PHYSICS_DISABLED
 		} else {
 			_drop_physics_mouseover();
+#endif // !_PHYSICS_DISABLED
 		}
 
 		if (over) {
@@ -3301,7 +3320,7 @@ void Viewport::_push_unhandled_input_internal(const Ref<InputEvent> &p_event) {
 		ERR_FAIL_COND(!is_inside_tree());
 		get_tree()->_call_input_pause(unhandled_input_group, SceneTree::CALL_INPUT_TYPE_UNHANDLED_INPUT, p_event, this);
 	}
-
+#ifndef _PHYSICS_DISABLED
 	if (physics_object_picking && !is_input_handled()) {
 		if (Input::get_singleton()->get_mouse_mode() != Input::MOUSE_MODE_CAPTURED &&
 				(Object::cast_to<InputEventMouse>(*p_event) ||
@@ -3313,8 +3332,10 @@ void Viewport::_push_unhandled_input_internal(const Ref<InputEvent> &p_event) {
 			set_input_as_handled();
 		}
 	}
+#endif // !_PHYSICS_DISABLED
 }
 
+#ifndef _PHYSICS_DISABLED
 void Viewport::set_physics_object_picking(bool p_enable) {
 	ERR_MAIN_THREAD_GUARD;
 	physics_object_picking = p_enable;
@@ -3350,6 +3371,7 @@ void Viewport::set_physics_object_picking_first_only(bool p_enable) {
 bool Viewport::get_physics_object_picking_first_only() {
 	return physics_object_picking_first_only;
 }
+#endif // !_PHYSICS_DISABLED
 
 Vector2 Viewport::get_camera_coords(const Vector2 &p_viewport_coords) const {
 	ERR_READ_THREAD_GUARD_V(Vector2());
@@ -3986,6 +4008,7 @@ void Viewport::_camera_2d_set(Camera2D *p_camera_2d) {
 	camera_2d = p_camera_2d;
 }
 
+#ifndef _PHYSICS_DISABLED
 void Viewport::_cleanup_mouseover_colliders(bool p_clean_all_frames, bool p_paused_only, uint64_t p_frame_reference) {
 	List<ObjectID> to_erase;
 	List<ObjectID> to_mouse_exit;
@@ -4055,6 +4078,7 @@ void Viewport::_cleanup_mouseover_colliders(bool p_clean_all_frames, bool p_paus
 		shapes_to_mouse_exit.pop_front();
 	}
 }
+#endif // !_PHYSICS_DISABLED
 
 AudioListener2D *Viewport::get_audio_listener_2d() const {
 	ERR_READ_THREAD_GUARD_V(nullptr);
@@ -4753,12 +4777,14 @@ void Viewport::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_texture"), &Viewport::get_texture);
 
+#ifndef _PHYSICS_DISABLED
 	ClassDB::bind_method(D_METHOD("set_physics_object_picking", "enable"), &Viewport::set_physics_object_picking);
 	ClassDB::bind_method(D_METHOD("get_physics_object_picking"), &Viewport::get_physics_object_picking);
 	ClassDB::bind_method(D_METHOD("set_physics_object_picking_sort", "enable"), &Viewport::set_physics_object_picking_sort);
 	ClassDB::bind_method(D_METHOD("get_physics_object_picking_sort"), &Viewport::get_physics_object_picking_sort);
 	ClassDB::bind_method(D_METHOD("set_physics_object_picking_first_only", "enable"), &Viewport::set_physics_object_picking_first_only);
 	ClassDB::bind_method(D_METHOD("get_physics_object_picking_first_only"), &Viewport::get_physics_object_picking_first_only);
+#endif // !_PHYSICS_DISABLED
 
 	ClassDB::bind_method(D_METHOD("get_viewport_rid"), &Viewport::get_viewport_rid);
 	ClassDB::bind_method(D_METHOD("push_text_input", "text"), &Viewport::push_text_input);
@@ -4834,7 +4860,9 @@ void Viewport::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_mesh_lod_threshold", "pixels"), &Viewport::set_mesh_lod_threshold);
 	ClassDB::bind_method(D_METHOD("get_mesh_lod_threshold"), &Viewport::get_mesh_lod_threshold);
 
+#ifndef _PHYSICS_DISABLED
 	ClassDB::bind_method(D_METHOD("_process_picking"), &Viewport::_process_picking);
+#endif // !_PHYSICS_DISABLED
 
 	ClassDB::bind_method(D_METHOD("set_as_audio_listener_2d", "enable"), &Viewport::set_as_audio_listener_2d);
 	ClassDB::bind_method(D_METHOD("is_audio_listener_2d"), &Viewport::is_audio_listener_2d);
@@ -4928,10 +4956,12 @@ void Viewport::_bind_methods() {
 #ifndef _3D_DISABLED
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "audio_listener_enable_3d"), "set_as_audio_listener_3d", "is_audio_listener_3d");
 #endif // _3D_DISABLED
+#ifndef _PHYSICS_DISABLED
 	ADD_GROUP("Physics", "physics_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "physics_object_picking"), "set_physics_object_picking", "get_physics_object_picking");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "physics_object_picking_sort"), "set_physics_object_picking_sort", "get_physics_object_picking_sort");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "physics_object_picking_first_only"), "set_physics_object_picking_first_only", "get_physics_object_picking_first_only");
+#endif // !_PHYSICS_DISABLED
 	ADD_GROUP("GUI", "gui_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "gui_disable_input"), "set_disable_input", "is_input_disabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "gui_snap_controls_to_pixels"), "set_snap_controls_to_pixels", "is_snap_controls_to_pixels_enabled");
