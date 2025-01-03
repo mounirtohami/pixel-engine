@@ -28,6 +28,17 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #ifndef TAB_CONTAINER_H
 #define TAB_CONTAINER_H
 
@@ -54,7 +65,6 @@ private:
 	bool menu_hovered = false;
 	mutable ObjectID popup_obj_id;
 	bool use_hidden_tabs_for_min_size = false;
-	bool theme_changing = false;
 	Vector<Control *> children_removing;
 	bool drag_to_rearrange_enabled = false;
 	// Set the default setup current tab to be an invalid index.
@@ -62,45 +72,14 @@ private:
 	bool updating_visibility = false;
 
 	struct ThemeCache {
-		int side_margin = 0;
-
 		Ref<StyleBox> panel_style;
-		Ref<StyleBox> tabbar_style;
 
 		Ref<Texture2D> menu_icon;
 		Ref<Texture2D> menu_hl_icon;
-
-		// TabBar overrides.
-		int icon_separation = 0;
-		int icon_max_width = 0;
-		int outline_size = 0;
-
-		Ref<StyleBox> tab_unselected_style;
-		Ref<StyleBox> tab_hovered_style;
-		Ref<StyleBox> tab_selected_style;
-		Ref<StyleBox> tab_disabled_style;
-		Ref<StyleBox> tab_focus_style;
-
-		Ref<Texture2D> increment_icon;
-		Ref<Texture2D> increment_hl_icon;
-		Ref<Texture2D> decrement_icon;
-		Ref<Texture2D> decrement_hl_icon;
-		Ref<Texture2D> drop_mark_icon;
-		Color drop_mark_color;
-
-		Color font_selected_color;
-		Color font_hovered_color;
-		Color font_unselected_color;
-		Color font_disabled_color;
-		Color font_outline_color;
-
-		Ref<Font> tab_font;
-		int tab_font_size;
 	} theme_cache;
 
 	int _get_tab_height() const;
 	Vector<Control *> _get_tab_controls() const;
-	void _on_theme_changed();
 	void _repaint();
 	void _refresh_tab_indices();
 	void _refresh_tab_names();
