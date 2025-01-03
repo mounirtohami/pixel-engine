@@ -105,10 +105,7 @@ EditorQuickOpenDialog::EditorQuickOpenDialog() {
 	{
 		// Search bar
 		MarginContainer *mc = memnew(MarginContainer);
-		mc->add_theme_constant_override("margin_top", 6);
-		mc->add_theme_constant_override("margin_bottom", 6);
-		mc->add_theme_constant_override("margin_left", 1);
-		mc->add_theme_constant_override("margin_right", 1);
+		mc->set_margin_individual(1, 6, 1, 6);
 		vbc->add_child(mc);
 
 		search_box = memnew(LineEdit);
@@ -881,10 +878,7 @@ QuickOpenResultListItem::QuickOpenResultListItem() {
 
 	{
 		image_container = memnew(MarginContainer);
-		image_container->add_theme_constant_override("margin_top", 2 * EDSCALE);
-		image_container->add_theme_constant_override("margin_bottom", 2 * EDSCALE);
-		image_container->add_theme_constant_override("margin_left", CONTAINER_MARGIN * EDSCALE);
-		image_container->add_theme_constant_override("margin_right", 0);
+		image_container->set_margin_individual(CONTAINER_MARGIN * EDSCALE, 2 * EDSCALE, 0, 2 * EDSCALE);
 		add_child(image_container);
 
 		thumbnail = memnew(TextureRect);

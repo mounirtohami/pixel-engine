@@ -127,12 +127,7 @@ void ColorPicker::_notification(int p_what) {
 				btn_shape->set_button_icon(shape_popup->get_item_icon(current_shape));
 			}
 
-			internal_margin->begin_bulk_theme_override();
-			internal_margin->add_theme_constant_override(SNAME("margin_bottom"), theme_cache.content_margin);
-			internal_margin->add_theme_constant_override(SNAME("margin_left"), theme_cache.content_margin);
-			internal_margin->add_theme_constant_override(SNAME("margin_right"), theme_cache.content_margin);
-			internal_margin->add_theme_constant_override(SNAME("margin_top"), theme_cache.content_margin);
-			internal_margin->end_bulk_theme_override();
+			internal_margin->set_margin_all(theme_cache.content_margin);
 
 			_reset_sliders_theme();
 

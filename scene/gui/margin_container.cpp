@@ -56,6 +56,19 @@ Size2 MarginContainer::get_minimum_size() const {
 	return max;
 }
 
+void MarginContainer::set_margin_all(int p_margin) {
+	set_margin_individual(p_margin, p_margin, p_margin, p_margin);
+}
+
+void MarginContainer::set_margin_individual(int p_left, int p_top, int p_right, int p_bottom) {
+	begin_bulk_theme_override();
+	add_theme_constant_override(SNAME("margin_left"), p_left);
+	add_theme_constant_override(SNAME("margin_top"), p_top);
+	add_theme_constant_override(SNAME("margin_right"), p_right);
+	add_theme_constant_override(SNAME("margin_bottom"), p_bottom);
+	end_bulk_theme_override();
+}
+
 Vector<int> MarginContainer::get_allowed_size_flags_horizontal() const {
 	Vector<int> flags;
 	flags.append(SIZE_FILL);

@@ -55,6 +55,9 @@ public:
 
 	int get_margin_size(Side p_side) const;
 
+	void set_margin_all(int p_margin);
+	void set_margin_individual(int p_left, int p_top, int p_right, int p_bottom);
+
 	MarginContainer();
 };
 
