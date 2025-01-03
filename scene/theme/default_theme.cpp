@@ -1299,7 +1299,7 @@ void make_default_theme(float p_scale, Ref<Font> p_font, TextServer::SubpixelPos
 		// embedded in both editor and export template binaries.
 		Ref<FontFile> dynamic_font;
 		dynamic_font.instantiate();
-		dynamic_font->set_data_ptr(_font_OpenSans_SemiBold, _font_OpenSans_SemiBold_size);
+		dynamic_font->set_data_ptr(_font_Cantarell_Regular, _font_Cantarell_Regular_size);
 		dynamic_font->set_subpixel_positioning(p_font_subpixel);
 		dynamic_font->set_hinting(p_font_hinting);
 		dynamic_font->set_antialiasing(p_font_antialiasing);

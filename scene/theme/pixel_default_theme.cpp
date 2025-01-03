@@ -41,7 +41,6 @@
 
 #include "pixel_default_theme.h"
 
-#include "core/os/os.h"
 #include "default_font.gen.h"
 #include "default_theme_icons.gen.h"
 #include "scene/resources/font.h"
@@ -64,14 +63,12 @@ static Dictionary icons;
 static Ref<StyleBoxFlat> panel_style;
 static Ref<StyleBoxFlat> popup_panel_style;
 static Ref<StyleBoxFlat> color_picker_popup_panel_style;
-static Ref<StyleBoxFlat> tab_panel_style;
 static Ref<StyleBoxFlat> color_sliders_panel_style;
+static Ref<StyleBoxFlat> tab_panel_style;
+static Ref<StyleBoxFlat> flat_panel_style;
 static Ref<StyleBoxFlat> tab_selected_style;
-static Ref<StyleBoxFlat> tab_unselected_style;
-static Ref<StyleBoxFlat> tab_hovered_style;
-static Ref<StyleBoxFlat> tab_disabled_style;
 static Ref<StyleBoxFlat> tab_focus_style;
-static Ref<StyleBoxFlat> button_normal_style;
+static Ref<StyleBoxEmpty> tab_empty_style;
 static Ref<StyleBoxFlat> button_hover_style;
 static Ref<StyleBoxFlat> button_pressed_style;
 static Ref<StyleBoxFlat> button_disabled_style;
@@ -107,7 +104,7 @@ static Ref<StyleBoxFlat> swatches_foldable_title_hover_style;
 static Ref<StyleBoxFlat> swatches_foldable_title_collapsed_hover_style;
 static Ref<StyleBoxLine> h_separator_style;
 static Ref<StyleBoxLine> v_separator_style;
-static Ref<StyleBoxEmpty> flat_button_normal;
+static Ref<StyleBoxEmpty> button_empty_style;
 static Ref<StyleBoxFlat> embedded_style;
 static Ref<StyleBoxFlat> embedded_unfocused_style;
 static Ref<StyleBoxFlat> graph_title_style;
@@ -361,6 +358,8 @@ void update_theme_icons(Ref<Theme> &p_theme, Color p_font_color, Color p_accent_
 	p_theme->set_icon("resizer", "GraphEditMinimap", icons["resizer_nw"]);
 	p_theme->set_icon("zoom_less", "ZoomWidget", icons["zoom_less"]);
 	p_theme->set_icon("zoom_more", "ZoomWidget", icons["zoom_more"]);
+	p_theme->set_icon("drop_mark", "TabBar", icons["tabs_drop_mark"]);
+	p_theme->set_icon("drop_mark", "TabContainer", icons["tabs_drop_mark"]);
 
 	p_theme->set_constant("grabber_offset", "PickerHSlider", Math::round(((Ref<Texture2D>)icons["color_picker_bar_arrow"])->get_size().height * 0.5));
 	ThemeDB::get_singleton()->set_fallback_icon(icons["error_icon"]);
@@ -587,11 +586,10 @@ void update_theme_padding(Ref<Theme> &p_theme, int p_padding) {
 	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
 	int padding = p_padding * base_scale;
 
-	tab_selected_style->set_content_margin_individual(padding, padding + base_scale * 2, padding, padding);
-	tab_unselected_style->set_content_margin_individual(padding, padding + base_scale * 2, padding, padding);
-	tab_hovered_style->set_content_margin_individual(padding, padding + base_scale * 2, padding, padding);
-	tab_disabled_style->set_content_margin_individual(padding, padding + base_scale * 2, padding, padding);
+	tab_selected_style->set_content_margin_individual(padding, padding - base_scale * 2, padding, padding);
+	tab_empty_style->set_content_margin_individual(padding, padding - base_scale * 2, padding, padding);
 	tab_panel_style->set_content_margin_all(padding);
+	flat_panel_style->set_content_margin_all(padding);
 	progress_background_style->set_content_margin_all(padding);
 	graph_frame_title_style->set_content_margin_all(padding);
 	graph_frame_title_selected_style->set_content_margin_all(padding);
@@ -615,7 +613,6 @@ void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
 	int corners = p_corner_radius * base_scale;
 
 	panel_style->set_corner_radius_all(corners);
-	button_normal_style->set_corner_radius_all(corners);
 	button_hover_style->set_corner_radius_all(corners);
 	button_pressed_style->set_corner_radius_all(corners);
 	button_disabled_style->set_corner_radius_all(corners);
@@ -673,7 +670,6 @@ void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
 	int border_padding = p_border_padding * MAX(p_theme->get_default_base_scale(), 0.5);
 
 	panel_style->set_content_margin_all(border_padding);
-	button_normal_style->set_content_margin_all(border_padding);
 	button_hover_style->set_content_margin_all(border_padding);
 	button_pressed_style->set_content_margin_all(border_padding);
 	button_disabled_style->set_content_margin_all(border_padding);
@@ -681,7 +677,7 @@ void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
 	menu_button_hover_style->set_content_margin_all(border_padding);
 	menu_button_pressed_style->set_content_margin_all(border_padding);
 	menu_button_disabled_style->set_content_margin_all(border_padding);
-	flat_button_normal->set_content_margin_all(border_padding);
+	button_empty_style->set_content_margin_all(border_padding);
 	p_theme->set_constant("arrow_margin", "OptionButton", border_padding);
 }
 
@@ -822,7 +818,6 @@ void update_theme_scale(Ref<Theme> &p_theme) {
 	p_theme->set_constant("sv_height", "ColorPicker", 256 * base_scale);
 
 	picker_slider_style->set_content_margin(SIDE_TOP, 16 * base_scale);
-	tab_selected_style->set_border_width(SIDE_TOP, x2_scale);
 	color_button_focus_style->set_border_width_all(x2_scale);
 	tab_focus_style->set_border_width_all(x2_scale);
 	h_separator_style->set_thickness(x2_scale);
@@ -860,6 +855,7 @@ void update_theme_scale(Ref<Theme> &p_theme) {
 	graph_frame_title_selected_style->set_border_width(SIDE_TOP, x2_scale);
 	color_mode_button_pressed_style->set_border_width(SIDE_TOP, x2_scale);
 	color_sliders_panel_style->set_content_margin_all(x2_scale);
+	tab_selected_style->set_border_width(SIDE_TOP, x2_scale);
 
 	h_scroll_style->set_content_margin_individual(0, x4_scale, 0, x4_scale);
 	v_scroll_style->set_content_margin_individual(x4_scale, 0, x4_scale, 0);
@@ -916,24 +912,29 @@ void update_theme_colors(Ref<Theme> &p_theme, Color p_base_color, Color p_accent
 	Color accent_color2 = p_accent_color.lerp(p_base_color, p_accent2_contrast);
 	Color bg_color = p_base_color.lerp(contrasted_color, p_bg_contrast);
 
-	button_pressed_style->set_bg_color(p_base_color);
+	/* #region base color*/
 	color_button_pressed_style->set_bg_color(p_base_color);
 	color_picker_button_pressed_style->set_bg_color(p_base_color);
 	menu_button_pressed_style->set_bg_color(p_base_color);
-	tab_selected_style->set_border_color(p_accent_color);
+	graph_frame_title_selected_style->set_bg_color(p_base_color);
+	flat_panel_style->set_bg_color(p_base_color);
+	/* #endregion */
+
+	/* #region accent color*/
+	button_focus_style->set_bg_color(p_accent_color);
+	color_button_focus_style->set_bg_color(p_accent_color);
+	menu_button_focus_style->set_bg_color(p_accent_color);
+	progress_fill_style->set_bg_color(p_accent_color);
+	grabber_highlight_style->set_bg_color(p_accent_color);
 	color_mode_button_pressed_style->set_border_color(p_accent_color);
 	tab_focus_style->set_border_color(p_accent_color);
 	graph_panel_selected_style->set_border_color(p_accent_color);
 	graph_frame_title_selected_style->set_border_color(p_accent_color);
 	graph_title_selected_style->set_border_color(p_accent_color);
-	button_focus_style->set_bg_color(p_accent_color);
-	color_button_focus_style->set_bg_color(p_accent_color);
 	button_focus_style->set_border_color(p_accent_color);
 	color_button_focus_style->set_border_color(p_accent_color);
-	menu_button_focus_style->set_bg_color(p_accent_color);
 	menu_button_focus_style->set_border_color(p_accent_color);
-	progress_fill_style->set_bg_color(p_accent_color);
-	grabber_highlight_style->set_bg_color(p_accent_color);
+	tab_selected_style->set_border_color(p_accent_color);
 	p_theme->set_color("drop_mark_color", "TabContainer", p_accent_color);
 	p_theme->set_color("drop_mark_color", "TabBar", p_accent_color);
 	p_theme->set_color("icon_pressed_color", "Button", p_accent_color);
@@ -957,21 +958,24 @@ void update_theme_colors(Ref<Theme> &p_theme, Color p_base_color, Color p_accent
 	p_theme->set_color("up_pressed_icon_modulate", "SpinBox", p_accent_color);
 	p_theme->set_color("selection_stroke", "GraphEdit", p_accent_color);
 	p_theme->set_color("button_icon_pressed", "FoldableContainer", p_accent_color);
-	p_theme->set_color("word_highlighted_color", "TextEdit", base_color4);
-	p_theme->set_color("word_highlighted_color", "CodeEdit", base_color4);
-	p_theme->set_color("current_line_color", "TextEdit", bg_color);
-	p_theme->set_color("current_line_color", "CodeEdit", bg_color);
+	/* #endregion */
+
+	/* #region accent color 2*/
 	p_theme->set_color("search_result_color", "TextEdit", accent_color2);
 	p_theme->set_color("search_result_color", "CodeEdit", accent_color2);
-	p_theme->set_color("selection_color", "LineEdit", base_color3);
-	p_theme->set_color("selection_color", "TextEdit", base_color3);
-	p_theme->set_color("selection_color", "CodeEdit", base_color3);
-	p_theme->set_color("selection_color", "RichTextLabel", base_color3);
-	popup_panel_style->set_bg_color(base_color3);
-	color_picker_popup_panel_style->set_bg_color(base_color3);
+	/* #endregion */
+
+	/* #region bg color*/
+	p_theme->set_color("current_line_color", "TextEdit", bg_color);
+	p_theme->set_color("current_line_color", "CodeEdit", bg_color);
+	panel_style->set_bg_color(bg_color);
+	graph_panel_style->set_bg_color(bg_color);
+	graph_panel_selected_style->set_bg_color(bg_color);
+	/* #endregion */
+
+	/* #region bg color 2*/
 	button_hover_style->set_bg_color(base_color2);
 	color_button_hover_style->set_bg_color(base_color2);
-	tab_hovered_style->set_bg_color(base_color2);
 	color_mode_button_hovered_style->set_bg_color(base_color2);
 	color_picker_button_hovered_style->set_bg_color(base_color2);
 	menu_button_hover_style->set_bg_color(base_color2);
@@ -981,21 +985,31 @@ void update_theme_colors(Ref<Theme> &p_theme, Color p_base_color, Color p_accent
 	swatches_foldable_title_hover_style->set_bg_color(base_color2);
 	foldable_title_collapsed_hover_style->set_bg_color(base_color2);
 	swatches_foldable_title_collapsed_hover_style->set_bg_color(base_color2);
-	panel_style->set_bg_color(bg_color);
-	graph_panel_style->set_bg_color(bg_color);
-	graph_panel_selected_style->set_bg_color(bg_color);
-	embedded_style->set_bg_color(base_color3);
-	embedded_unfocused_style->set_bg_color(base_color4);
-	tab_panel_style->set_bg_color(base_color3);
-	color_sliders_panel_style->set_bg_color(base_color3);
-	tab_selected_style->set_bg_color(base_color3);
-	color_mode_button_pressed_style->set_bg_color(base_color3);
 	popup_hover_style->set_bg_color(base_color2);
+	/* #endregion */
+
+	/* #region base color 3*/
+	color_picker_popup_panel_style->set_bg_color(base_color3);
+	button_pressed_style->set_bg_color(base_color3);
+	popup_panel_style->set_bg_color(base_color3);
+	embedded_style->set_bg_color(base_color3);
+	color_sliders_panel_style->set_bg_color(base_color3);
+	color_mode_button_pressed_style->set_bg_color(base_color3);
 	progress_background_style->set_bg_color(base_color3);
 	foldable_panel_style->set_bg_color(base_color3);
 	swatches_foldable_panel_style->set_bg_color(base_color3);
-	tab_unselected_style->set_bg_color(base_color4);
-	button_normal_style->set_bg_color(base_color4);
+	p_theme->set_color("selection_color", "LineEdit", base_color3);
+	p_theme->set_color("selection_color", "TextEdit", base_color3);
+	p_theme->set_color("selection_color", "CodeEdit", base_color3);
+	p_theme->set_color("selection_color", "RichTextLabel", base_color3);
+	/* #endregion */
+
+	/* #region base color 4*/
+	embedded_unfocused_style->set_bg_color(base_color4);
+	tab_panel_style->set_bg_color(base_color4);
+	tab_selected_style->set_bg_color(base_color4);
+	p_theme->set_color("word_highlighted_color", "TextEdit", base_color4);
+	p_theme->set_color("word_highlighted_color", "CodeEdit", base_color4);
 	color_button_normal_style->set_bg_color(base_color4);
 	color_mode_button_normal_style->set_bg_color(base_color4);
 	color_picker_button_normal_style->set_bg_color(base_color4);
@@ -1009,21 +1023,22 @@ void update_theme_colors(Ref<Theme> &p_theme, Color p_base_color, Color p_accent
 	graph_title_style->set_bg_color(base_color4);
 	graph_frame_title_style->set_bg_color(base_color4);
 	graph_title_selected_style->set_bg_color(p_base_color);
-	graph_frame_title_selected_style->set_bg_color(p_base_color);
 	Color transparent_base_color4 = base_color4;
 	transparent_base_color4.a = 0.4;
-	tab_disabled_style->set_bg_color(transparent_base_color4);
 	button_disabled_style->set_bg_color(transparent_base_color4);
 	color_button_disabled_style->set_bg_color(transparent_base_color4);
 	color_picker_button_disabled_style->set_bg_color(transparent_base_color4);
 	menu_button_disabled_style->set_bg_color(transparent_base_color4);
+	/* #endregion */
 
+	/* #region luminance*/
 	float v = p_base_color.get_luminance() <= 0.5 ? 1.f : 0.f;
 	p_theme->set_color("grid_minor", "GraphEdit", Color(v, v, v, 0.05));
 	p_theme->set_color("grid_major", "GraphEdit", Color(v, v, v, 0.2));
 	p_theme->set_color("activity", "GraphEdit", Color(v, v, v));
 	p_theme->set_color("connection_hover_tint_color", "GraphEdit", Color(1.f - v, 1.f - v, 1.f - v, 0.3));
 	p_theme->set_color("connection_valid_target_tint_color", "GraphEdit", Color(v, v, v, 0.4));
+	/* #endregion */
 }
 
 void update_theme_font(Ref<Theme> &p_theme, Ref<Font> p_font) {
@@ -1099,7 +1114,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 
 	Ref<FontFile> base_font;
 	base_font.instantiate();
-	base_font->set_data_ptr(_font_OpenSans_SemiBold, _font_OpenSans_SemiBold_size);
+	base_font->set_data_ptr(_font_Cantarell_Regular, _font_Cantarell_Regular_size);
 
 	fallback_font.instantiate();
 	fallback_font->set_base_font(base_font);
@@ -1115,6 +1130,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 
 	t->set_default_base_scale(scale);
 
+	/* #region type variations*/
 	t->set_type_variation("FlatButton", "Button");
 	t->set_type_variation("FlatMenuButton", "MenuButton");
 	t->set_type_variation("GraphNodeTitleLabel", "Label");
@@ -1135,6 +1151,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_type_variation("ColorPickerVBox", "VBoxContainer");
 	t->set_type_variation("ColorPickerGrid", "GridContainer");
 	t->set_type_variation("SwatchesFoldableContainer", "FoldableContainer");
+	t->set_type_variation("ButtonsTab", "TabBar");
 
 	Ref<StyleBoxEmpty> empty_style(memnew(StyleBoxEmpty));
 
@@ -1142,13 +1159,11 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	popup_panel_style.instantiate();
 	color_picker_popup_panel_style.instantiate();
 	tab_panel_style.instantiate();
+	flat_panel_style.instantiate();
 	color_sliders_panel_style.instantiate();
 	tab_selected_style.instantiate();
-	tab_unselected_style.instantiate();
-	tab_hovered_style.instantiate();
-	tab_disabled_style.instantiate();
 	tab_focus_style.instantiate();
-	button_normal_style.instantiate();
+	tab_empty_style.instantiate();
 	button_hover_style.instantiate();
 	button_pressed_style.instantiate();
 	button_disabled_style.instantiate();
@@ -1184,7 +1199,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	swatches_foldable_title_collapsed_hover_style.instantiate();
 	h_separator_style.instantiate();
 	v_separator_style.instantiate();
-	flat_button_normal.instantiate();
+	button_empty_style.instantiate();
 	embedded_style.instantiate();
 	embedded_unfocused_style.instantiate();
 	graph_title_style.instantiate();
@@ -1239,26 +1254,26 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_stylebox("hover", "PickerModeButton", color_mode_button_hovered_style);
 	t->set_stylebox("disabled", "PickerModeButton", empty_style);
 	t->set_stylebox("focus", "PickerModeButton", tab_focus_style);
-	t->set_stylebox("tab_selected", "TabContainer", tab_selected_style);
-	t->set_stylebox("tab_unselected", "TabContainer", tab_unselected_style);
-	t->set_stylebox("tab_hovered", "TabContainer", tab_unselected_style);
-	t->set_stylebox("tab_disabled", "TabContainer", tab_disabled_style);
-	t->set_stylebox("tab_focus", "TabContainer", tab_focus_style);
 	t->set_stylebox("tab_selected", "TabBar", tab_selected_style);
-	t->set_stylebox("tab_unselected", "TabBar", tab_unselected_style);
-	t->set_stylebox("tab_hovered", "TabBar", tab_unselected_style);
-	t->set_stylebox("tab_disabled", "TabBar", tab_disabled_style);
+	t->set_stylebox("tab_unselected", "TabBar", tab_empty_style);
+	t->set_stylebox("tab_hovered", "TabBar", tab_empty_style);
+	t->set_stylebox("tab_disabled", "TabBar", tab_empty_style);
 	t->set_stylebox("tab_focus", "TabBar", tab_focus_style);
-	t->set_stylebox(CoreStringName(normal), "Button", button_normal_style);
+	t->set_stylebox("tab_selected", "ButtonsTab", button_pressed_style);
+	t->set_stylebox("tab_unselected", "ButtonsTab", button_empty_style);
+	t->set_stylebox("tab_hovered", "ButtonsTab", button_empty_style);
+	t->set_stylebox("tab_disabled", "ButtonsTab", button_empty_style);
+	t->set_stylebox("tab_focus", "ButtonsTab", button_focus_style);
+	t->set_stylebox(CoreStringName(normal), "Button", button_empty_style);
 	t->set_stylebox("hover", "Button", button_hover_style);
 	t->set_stylebox(SceneStringName(pressed), "Button", button_pressed_style);
 	t->set_stylebox("hover_pressed", "Button", button_pressed_style);
 	t->set_stylebox("disabled", "Button", button_disabled_style);
 	t->set_stylebox("focus", "Button", button_focus_style);
-	t->set_stylebox(CoreStringName(normal), "LineEdit", button_normal_style);
+	t->set_stylebox(CoreStringName(normal), "LineEdit", button_hover_style);
 	t->set_stylebox("read_only", "LineEdit", button_disabled_style);
 	t->set_stylebox("focus", "LineEdit", button_focus_style);
-	t->set_stylebox(CoreStringName(normal), "TextEdit", button_normal_style);
+	t->set_stylebox(CoreStringName(normal), "TextEdit", button_hover_style);
 	t->set_stylebox("read_only", "TextEdit", button_disabled_style);
 	t->set_stylebox("focus", "TextEdit", button_focus_style);
 	t->set_stylebox(CoreStringName(normal), "MenuButton", menu_button_normal_style);
@@ -1305,15 +1320,15 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_stylebox("down_background_hovered", "SpinBox", button_hover_style);
 	t->set_stylebox("up_background_pressed", "SpinBox", button_pressed_style);
 	t->set_stylebox("down_background_pressed", "SpinBox", button_pressed_style);
-	t->set_stylebox("custom_button", "Tree", button_normal_style);
+	t->set_stylebox("custom_button", "Tree", button_empty_style);
 	t->set_stylebox("custom_button_hover", "Tree", button_hover_style);
 	t->set_stylebox("custom_button_pressed", "Tree", button_pressed_style);
 	t->set_stylebox("focus", "Tree", button_focus_style);
-	t->set_stylebox(SceneStringName(panel), "Tree", button_normal_style);
+	t->set_stylebox(SceneStringName(panel), "Tree", button_empty_style);
 	t->set_stylebox("selected", "Tree", popup_hover_style);
 	t->set_stylebox("selected_focus", "Tree", popup_hover_style);
 	t->set_stylebox("title_button_hover", "Tree", button_hover_style);
-	t->set_stylebox("title_button_normal", "Tree", button_normal_style);
+	t->set_stylebox("title_button_normal", "Tree", button_empty_style);
 	t->set_stylebox("title_button_pressed", "Tree", button_pressed_style);
 	t->set_stylebox("cursor", "Tree", button_focus_style);
 	t->set_stylebox("cursor_unfocused", "Tree", button_focus_style);
@@ -1323,31 +1338,31 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_stylebox("separator", "PopupMenu", h_separator_style);
 	t->set_stylebox("separator", "HSeparator", h_separator_style);
 	t->set_stylebox("separator", "VSeparator", v_separator_style);
-	t->set_stylebox(SceneStringName(panel), "FlatPanel", popup_panel_style);
-	t->set_stylebox(CoreStringName(normal), "MenuBar", button_normal_style);
+	t->set_stylebox(SceneStringName(panel), "FlatPanel", flat_panel_style);
+	t->set_stylebox(CoreStringName(normal), "MenuBar", button_empty_style);
 	t->set_stylebox("hover", "MenuBar", button_hover_style);
 	t->set_stylebox(SceneStringName(pressed), "MenuBar", button_pressed_style);
 	t->set_stylebox("disabled", "MenuBar", button_disabled_style);
-	t->set_stylebox(CoreStringName(normal), "OptionButton", button_normal_style);
+	t->set_stylebox(CoreStringName(normal), "OptionButton", button_empty_style);
 	t->set_stylebox("hover", "OptionButton", button_hover_style);
 	t->set_stylebox(SceneStringName(pressed), "OptionButton", button_pressed_style);
 	t->set_stylebox("disabled", "OptionButton", button_disabled_style);
-	t->set_stylebox("normal_mirrored", "OptionButton", button_normal_style);
+	t->set_stylebox("normal_mirrored", "OptionButton", button_empty_style);
 	t->set_stylebox("hover_mirrored", "OptionButton", button_hover_style);
 	t->set_stylebox("pressed_mirrored", "OptionButton", button_pressed_style);
 	t->set_stylebox("disabled_mirrored", "OptionButton", button_disabled_style);
-	t->set_stylebox(CoreStringName(normal), "CheckBox", flat_button_normal);
-	t->set_stylebox(SceneStringName(pressed), "CheckBox", flat_button_normal);
-	t->set_stylebox("disabled", "CheckBox", flat_button_normal);
-	t->set_stylebox("hover", "CheckBox", flat_button_normal);
-	t->set_stylebox("hover_pressed", "CheckBox", flat_button_normal);
+	t->set_stylebox(CoreStringName(normal), "CheckBox", button_empty_style);
+	t->set_stylebox(SceneStringName(pressed), "CheckBox", button_empty_style);
+	t->set_stylebox("disabled", "CheckBox", button_empty_style);
+	t->set_stylebox("hover", "CheckBox", button_empty_style);
+	t->set_stylebox("hover_pressed", "CheckBox", button_empty_style);
 	t->set_stylebox("focus", "CheckBox", button_focus_style);
-	t->set_stylebox("focus", "LinkButton", flat_button_normal);
-	t->set_stylebox(CoreStringName(normal), "CheckButton", flat_button_normal);
-	t->set_stylebox(SceneStringName(pressed), "CheckButton", flat_button_normal);
-	t->set_stylebox("disabled", "CheckButton", flat_button_normal);
-	t->set_stylebox("hover", "CheckButton", flat_button_normal);
-	t->set_stylebox("hover_pressed", "CheckButton", flat_button_normal);
+	t->set_stylebox("focus", "LinkButton", button_empty_style);
+	t->set_stylebox(CoreStringName(normal), "CheckButton", button_empty_style);
+	t->set_stylebox(SceneStringName(pressed), "CheckButton", button_empty_style);
+	t->set_stylebox("disabled", "CheckButton", button_empty_style);
+	t->set_stylebox("hover", "CheckButton", button_empty_style);
+	t->set_stylebox("hover_pressed", "CheckButton", button_empty_style);
 	t->set_stylebox("focus", "CheckButton", button_focus_style);
 	t->set_stylebox(CoreStringName(normal), "Label", empty_style);
 	t->set_stylebox(CoreStringName(normal), "GraphNodeTitleLabel", empty_style);
@@ -1361,28 +1376,27 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_stylebox("disabled", "ColorButton", color_button_disabled_style);
 	t->set_stylebox("focus", "ColorButton", color_button_focus_style);
 	t->set_stylebox("focus", "RichTextLabel", button_focus_style);
-	t->set_stylebox(CoreStringName(normal), "RichTextLabel", flat_button_normal);
-	t->set_stylebox(CoreStringName(normal), "CodeEdit", button_normal_style);
+	t->set_stylebox(CoreStringName(normal), "RichTextLabel", button_empty_style);
+	t->set_stylebox(CoreStringName(normal), "CodeEdit", button_empty_style);
 	t->set_stylebox("focus", "CodeEdit", button_focus_style);
 	t->set_stylebox("read_only", "CodeEdit", button_disabled_style);
 	t->set_stylebox("completion", "CodeEdit", empty_style);
-	t->set_stylebox(CoreStringName(normal), "FlatButton", flat_button_normal);
+	t->set_stylebox(CoreStringName(normal), "FlatButton", button_empty_style);
 	t->set_stylebox("hover", "FlatButton", button_hover_style);
 	t->set_stylebox(SceneStringName(pressed), "FlatButton", button_pressed_style);
-	t->set_stylebox("disabled", "FlatButton", flat_button_normal);
-	t->set_stylebox(CoreStringName(normal), "FlatMenuButton", flat_button_normal);
-	t->set_stylebox("hover", "FlatMenuButton", flat_button_normal);
+	t->set_stylebox("disabled", "FlatButton", button_empty_style);
+	t->set_stylebox(CoreStringName(normal), "FlatMenuButton", button_empty_style);
+	t->set_stylebox("hover", "FlatMenuButton", button_empty_style);
 	t->set_stylebox(SceneStringName(pressed), "FlatMenuButton", button_pressed_style);
-	t->set_stylebox("disabled", "FlatMenuButton", flat_button_normal);
+	t->set_stylebox("disabled", "FlatMenuButton", button_empty_style);
 	t->set_stylebox("scroll_focus", "HScrollBar", empty_style);
 	t->set_stylebox("scroll_focus", "VScrollBar", empty_style);
-	t->set_stylebox("up_background", "SpinBox", button_normal_style);
-	t->set_stylebox("down_background", "SpinBox", button_normal_style);
+	t->set_stylebox("up_background", "SpinBox", button_empty_style);
+	t->set_stylebox("down_background", "SpinBox", button_empty_style);
 	t->set_stylebox("up_background_disabled", "SpinBox", button_disabled_style);
 	t->set_stylebox("down_background_disabled", "SpinBox", button_disabled_style);
-	t->set_stylebox("tabbar_background", "TabContainer", empty_style);
 	t->set_stylebox("button_pressed", "TabBar", button_pressed_style);
-	t->set_stylebox("button_highlight", "TabBar", button_normal_style);
+	t->set_stylebox("button_highlight", "TabBar", button_hover_style);
 	t->set_stylebox(SceneStringName(panel), "ScrollContainer", empty_style);
 	t->set_stylebox(SceneStringName(panel), "TooltipPanel", popup_panel_style);
 	t->set_stylebox(SceneStringName(panel), "ItemList", panel_style);
@@ -1400,8 +1414,8 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_stylebox("menu_panel", "GraphEdit", button_disabled_style);
 	t->set_stylebox(SceneStringName(panel), "GraphEdit", tab_panel_style);
 	t->set_stylebox("camera", "GraphEditMinimap", button_focus_style);
-	t->set_stylebox(SceneStringName(panel), "GraphEditMinimap", tab_disabled_style);
-	t->set_stylebox("node", "GraphEditMinimap", tab_unselected_style);
+	t->set_stylebox(SceneStringName(panel), "GraphEditMinimap", empty_style);
+	t->set_stylebox("node", "GraphEditMinimap", empty_style);
 	t->set_stylebox("titlebar", "GraphFrame", graph_frame_title_style);
 	t->set_stylebox("titlebar_selected", "GraphFrame", graph_frame_title_selected_style);
 	t->set_stylebox(SceneStringName(panel), "GraphFrame", graph_panel_style);
@@ -1568,13 +1582,11 @@ void finalize_default_theme() {
 	popup_panel_style.unref();
 	color_picker_popup_panel_style.unref();
 	tab_panel_style.unref();
+	flat_panel_style.unref();
 	color_sliders_panel_style.unref();
 	tab_selected_style.unref();
-	tab_unselected_style.unref();
-	tab_hovered_style.unref();
-	tab_disabled_style.unref();
 	tab_focus_style.unref();
-	button_normal_style.unref();
+	tab_empty_style.unref();
 	button_hover_style.unref();
 	button_pressed_style.unref();
 	button_disabled_style.unref();
@@ -1610,7 +1622,7 @@ void finalize_default_theme() {
 	swatches_foldable_title_collapsed_hover_style.unref();
 	h_separator_style.unref();
 	v_separator_style.unref();
-	flat_button_normal.unref();
+	button_empty_style.unref();
 	embedded_style.unref();
 	embedded_unfocused_style.unref();
 	graph_title_style.unref();

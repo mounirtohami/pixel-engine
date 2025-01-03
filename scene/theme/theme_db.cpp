@@ -752,10 +752,10 @@ ThemeDB::ThemeDB() {
 	a2_contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/accent2_contrast", PROPERTY_HINT_RANGE, "0.0, 1.0, 0.01"), 0.6);
 	bg_contrast = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/bg_contrast", PROPERTY_HINT_RANGE, "0.0, 1.0, 0.01"), 0.8);
 	margin = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/margin", PROPERTY_HINT_RANGE, "0, 32, 1"), 4);
-	padding = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/padding", PROPERTY_HINT_RANGE, "0, 32, 1"), 4);
+	padding = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/padding", PROPERTY_HINT_RANGE, "0, 32, 1"), 2);
 	border_width = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/border_width", PROPERTY_HINT_RANGE, "0, 32, 1"), 2);
 	corner_radius = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/corner_radius", PROPERTY_HINT_RANGE, "0, 32, 1"), 6);
-	font_size = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_size", PROPERTY_HINT_RANGE, "0, 64, 1"), 16);
+	font_size = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_size", PROPERTY_HINT_RANGE, "0, 64, 1"), 14);
 	font_outline_size = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_outline_size", PROPERTY_HINT_RANGE, "0, 64, 1"), 0);
 	font_embolden = GLOBAL_DEF_BASIC(PropertyInfo(Variant::FLOAT, "gui/theme/font_embolden", PROPERTY_HINT_RANGE, "-2.0, 2.0, 0.01"), 0.0);
 	font_spacing_glyph = GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "gui/theme/font_spacing_glyph", PROPERTY_HINT_RANGE, "-64, 64, 1"), 0);

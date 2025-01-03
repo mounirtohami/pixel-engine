@@ -305,6 +305,10 @@ Files extracted from upstream source:
   * Upstream: https://fonts.google.com/specimen/Open+Sans
   * Version: 1.10 (downloaded from Google Fonts in February 2021)
   * License: Apache 2.0
+- `Cantarell_Regular.woff2`:
+  * Upstream: https://fonts.google.com/specimen/Cantarell
+  * Version: ? (downloaded from Google Fonts in February 2024)
+  * License: OFL-1.1
 - `Vazirmatn*.woff2`:
   * Upstream: https://github.com/rastikerdar/vazirmatn
   * Version: 33.003 (83629f877e8f084cc07b47030b5d3a0ff06c76ec, 2022)
