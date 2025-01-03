@@ -28,15 +28,27 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+/**************************************************************************/
+/*                             PIXEL ENGINE                               */
+/* Copyright (c) 2024-present Pixel Engine contributors (see AUTHORS.md). */
+/**************************************************************************/
+/* NOTICE:                                                                */
+/* This file contains modifications and additions specific to the Pixel   */
+/* Engine project. While these changes are licensed under the MIT license */
+/* for compatibility, we request proper attribution if reused in any      */
+/* derivative works, including meta-forks.                                */
+/**************************************************************************/
+
 #ifndef SPLIT_CONTAINER_H
 #define SPLIT_CONTAINER_H
 
 #include "scene/gui/container.h"
 
+class SplitContainer;
+
 class SplitContainerDragger : public Control {
 	GDCLASS(SplitContainerDragger, Control);
-	friend class SplitContainer;
-	Rect2 split_bar_rect;
+	SplitContainer *sc = nullptr;
 
 protected:
 	void _notification(int p_what);
@@ -50,6 +62,7 @@ private:
 
 public:
 	virtual CursorShape get_cursor_shape(const Point2 &p_pos = Point2i()) const override;
+	SplitContainerDragger(SplitContainer *p_sc);
 };
 
 class SplitContainer : public Container {
@@ -57,42 +70,34 @@ class SplitContainer : public Container {
 	friend class SplitContainerDragger;
 
 public:
-	enum DraggerVisibility {
-		DRAGGER_VISIBLE,
-		DRAGGER_HIDDEN,
-		DRAGGER_HIDDEN_COLLAPSED
+	enum CollapseMode {
+		COLLAPSE_NONE,
+		COLLAPSE_FIRST,
+		COLLAPSE_SECOND,
+		COLLAPSE_ALL,
+		COLLAPSE_MODE_MAX
 	};
 
 private:
-	int show_drag_area = false;
-	int drag_area_margin_begin = 0;
-	int drag_area_margin_end = 0;
-	int drag_area_offset = 0;
 	int split_offset = 0;
-	int computed_split_offset = 0;
+	int middle_sep = 0;
 	bool vertical = false;
-	bool collapsed = false;
-	DraggerVisibility dragger_visibility = DRAGGER_VISIBLE;
-	bool dragging_enabled = true;
+	CollapseMode collapse_mode = COLLAPSE_NONE;
 
-	SplitContainerDragger *dragging_area_control = nullptr;
+	SplitContainerDragger *dragger_control = nullptr;
 
 	struct ThemeCache {
 		int separation = 0;
 		int minimum_grab_thickness = 0;
+		int grabber_thickness = 0;
 		bool autohide = false;
-		Ref<Texture2D> grabber_icon;
-		Ref<Texture2D> grabber_icon_h;
-		Ref<Texture2D> grabber_icon_v;
-		float base_scale = 1.0;
-		Ref<StyleBox> split_bar_background;
+		Color grabber_normal;
+		Color grabber_hovered;
+		Color grabber_pressed;
 	} theme_cache;
 
-	Ref<Texture2D> _get_grabber_icon() const;
 	void _compute_split_offset(bool p_clamp);
-	int _get_separation() const;
-	void _resort();
-	Control *_get_sortable_child(int p_idx, SortableVisbilityMode p_visibility_mode = SortableVisbilityMode::VISIBLE_IN_TREE) const;
+	Control *_get_child(int p_idx) const;
 
 protected:
 	bool is_fixed = false;
@@ -103,44 +108,26 @@ protected:
 
 public:
 	void set_split_offset(int p_offset);
-	int get_split_offset() const;
+	int get_split_offset() const { return split_offset; }
 	void clamp_split_offset();
 
-	void set_collapsed(bool p_collapsed);
-	bool is_collapsed() const;
-
-	void set_dragger_visibility(DraggerVisibility p_visibility);
-	DraggerVisibility get_dragger_visibility() const;
-
 	void set_vertical(bool p_vertical);
-	bool is_vertical() const;
+	bool is_vertical() const { return vertical; }
 
-	void set_dragging_enabled(bool p_enabled);
-	bool is_dragging_enabled() const;
+	void set_collapse_mode(CollapseMode p_mode);
+	CollapseMode get_collapse_mode() const { return collapse_mode; }
 
 	virtual Size2 get_minimum_size() const override;
 
 	virtual Vector<int> get_allowed_size_flags_horizontal() const override;
 	virtual Vector<int> get_allowed_size_flags_vertical() const override;
 
-	void set_drag_area_margin_begin(int p_margin);
-	int get_drag_area_margin_begin() const;
-
-	void set_drag_area_margin_end(int p_margin);
-	int get_drag_area_margin_end() const;
-
-	void set_drag_area_offset(int p_offset);
-	int get_drag_area_offset() const;
-
-	void set_show_drag_area_enabled(bool p_enabled);
-	bool is_show_drag_area_enabled() const;
-
-	Control *get_drag_area_control() { return dragging_area_control; }
+	Control *get_dragger() { return dragger_control; }
 
 	SplitContainer(bool p_vertical = false);
 };
 
-VARIANT_ENUM_CAST(SplitContainer::DraggerVisibility);
+VARIANT_ENUM_CAST(SplitContainer::CollapseMode);
 
 class HSplitContainer : public SplitContainer {
 	GDCLASS(HSplitContainer, SplitContainer);
