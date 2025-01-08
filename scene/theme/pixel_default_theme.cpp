@@ -54,9 +54,6 @@
 #include "servers/text_server.h"
 
 #include "modules/modules_enabled.gen.h" // For svg.
-#ifdef MODULE_SVG_ENABLED
-#include "modules/svg/image_loader_svg.h"
-#endif
 
 static Dictionary icons;
 
@@ -68,7 +65,6 @@ static Ref<StyleBoxFlat> tab_panel_style;
 static Ref<StyleBoxFlat> flat_panel_style;
 static Ref<StyleBoxFlat> tab_selected_style;
 static Ref<StyleBoxFlat> tab_focus_style;
-static Ref<StyleBoxEmpty> tab_empty_style;
 static Ref<StyleBoxFlat> button_hover_style;
 static Ref<StyleBoxFlat> button_pressed_style;
 static Ref<StyleBoxFlat> button_disabled_style;
@@ -102,9 +98,6 @@ static Ref<StyleBoxFlat> swatches_foldable_title_style;
 static Ref<StyleBoxFlat> swatches_foldable_title_collapsed_style;
 static Ref<StyleBoxFlat> swatches_foldable_title_hover_style;
 static Ref<StyleBoxFlat> swatches_foldable_title_collapsed_hover_style;
-static Ref<StyleBoxLine> h_separator_style;
-static Ref<StyleBoxLine> v_separator_style;
-static Ref<StyleBoxEmpty> button_empty_style;
 static Ref<StyleBoxFlat> embedded_style;
 static Ref<StyleBoxFlat> embedded_unfocused_style;
 static Ref<StyleBoxFlat> graph_title_style;
@@ -120,6 +113,11 @@ static Ref<StyleBoxFlat> color_picker_button_normal_style;
 static Ref<StyleBoxFlat> color_picker_button_hovered_style;
 static Ref<StyleBoxFlat> color_picker_button_pressed_style;
 static Ref<StyleBoxFlat> color_picker_button_disabled_style;
+static Ref<StyleBoxFlat> spin_slider_label_style;
+static Ref<StyleBoxEmpty> button_empty_style;
+static Ref<StyleBoxEmpty> tab_empty_style;
+static Ref<StyleBoxLine> h_separator_style;
+static Ref<StyleBoxLine> v_separator_style;
 
 static Ref<FontVariation> fallback_font;
 static Ref<FontVariation> custom_font;
@@ -128,7 +126,7 @@ static Ref<FontVariation> bold_italics_font;
 static Ref<FontVariation> italics_font;
 static bool using_custom_font_variation = false;
 
-// See also `editor_generate_icon()` in `editor/themes/editor_icons.cpp`.
+/* #region Icons */
 static Ref<Image> generate_icon(int p_index, float p_scale, Color p_font_color, Color p_accent_color) {
 	Ref<Image> img = memnew(Image);
 
@@ -360,11 +358,15 @@ void update_theme_icons(Ref<Theme> &p_theme, Color p_font_color, Color p_accent_
 	p_theme->set_icon("zoom_more", "ZoomWidget", icons["zoom_more"]);
 	p_theme->set_icon("drop_mark", "TabBar", icons["tabs_drop_mark"]);
 	p_theme->set_icon("drop_mark", "TabContainer", icons["tabs_drop_mark"]);
+	p_theme->set_icon("updown", "SpinSlider", icons["updown"]);
+	p_theme->set_icon("updown_disabled", "SpinSlider", icons["updown_disabled"]);
 
 	p_theme->set_constant("grabber_offset", "PickerHSlider", Math::round(((Ref<Texture2D>)icons["color_picker_bar_arrow"])->get_size().height * 0.5));
 	ThemeDB::get_singleton()->set_fallback_icon(icons["error_icon"]);
 }
+/* #endregion Icons */
 
+/* #region Colors */
 static Color contrast_color(Color p_color, float p_value) {
 	if (Math::is_equal_approx(p_value, 0.f)) {
 		return p_color;
@@ -375,6 +377,146 @@ static Color contrast_color(Color p_color, float p_value) {
 	}
 }
 
+void update_theme_colors(Ref<Theme> &p_theme, Color p_base_color, Color p_accent_color, float p_contrast, float p_base2_contrast, float p_base3_contrast, float p_base4_contrast, float p_accent2_contrast, float p_bg_contrast) {
+	Color contrasted_color = contrast_color(p_base_color, p_contrast);
+	Color base_color2 = p_base_color.lerp(contrasted_color, p_base2_contrast);
+	Color base_color3 = p_base_color.lerp(contrasted_color, p_base3_contrast);
+	Color base_color4 = p_base_color.lerp(contrasted_color, p_base4_contrast);
+	Color accent_color2 = p_accent_color.lerp(p_base_color, p_accent2_contrast);
+	Color bg_color = p_base_color.lerp(contrasted_color, p_bg_contrast);
+
+	/* #region base color*/
+	color_button_pressed_style->set_bg_color(p_base_color);
+	color_picker_button_pressed_style->set_bg_color(p_base_color);
+	menu_button_pressed_style->set_bg_color(p_base_color);
+	graph_frame_title_selected_style->set_bg_color(p_base_color);
+	flat_panel_style->set_bg_color(p_base_color);
+	spin_slider_label_style->set_bg_color(p_base_color);
+	/* #endregion */
+
+	/* #region accent color*/
+	button_focus_style->set_bg_color(p_accent_color);
+	color_button_focus_style->set_bg_color(p_accent_color);
+	menu_button_focus_style->set_bg_color(p_accent_color);
+	progress_fill_style->set_bg_color(p_accent_color);
+	grabber_highlight_style->set_bg_color(p_accent_color);
+	color_mode_button_pressed_style->set_border_color(p_accent_color);
+	tab_focus_style->set_border_color(p_accent_color);
+	graph_panel_selected_style->set_border_color(p_accent_color);
+	graph_frame_title_selected_style->set_border_color(p_accent_color);
+	graph_title_selected_style->set_border_color(p_accent_color);
+	button_focus_style->set_border_color(p_accent_color);
+	color_button_focus_style->set_border_color(p_accent_color);
+	menu_button_focus_style->set_border_color(p_accent_color);
+	tab_selected_style->set_border_color(p_accent_color);
+	p_theme->set_color("drop_mark_color", "TabContainer", p_accent_color);
+	p_theme->set_color("drop_mark_color", "TabBar", p_accent_color);
+	p_theme->set_color("icon_pressed_color", "Button", p_accent_color);
+	p_theme->set_color("icon_hover_pressed_color", "Button", p_accent_color);
+	p_theme->set_color("font_pressed_color", "Button", p_accent_color);
+	p_theme->set_color("font_pressed_color", "LinkButton", p_accent_color);
+	p_theme->set_color("font_hover_pressed_color", "Button", p_accent_color);
+	p_theme->set_color("font_hover_pressed_color", "LinkButton", p_accent_color);
+	p_theme->set_color("grabber_pressed", "SplitContainer", p_accent_color);
+	p_theme->set_color("grabber_pressed", "HSplitContainer", p_accent_color);
+	p_theme->set_color("grabber_pressed", "VSplitContainer", p_accent_color);
+	p_theme->set_color("clear_button_color_pressed", "LineEdit", p_accent_color);
+	p_theme->set_color("font_pressed_color", "MenuBar", p_accent_color);
+	p_theme->set_color("font_pressed_color", "OptionButton", p_accent_color);
+	p_theme->set_color("font_pressed_color", "MenuButton", p_accent_color);
+	p_theme->set_color("font_pressed_color", "CheckBox", p_accent_color);
+	p_theme->set_color("font_hover_pressed_color", "CheckBox", p_accent_color);
+	p_theme->set_color("font_pressed_color", "CheckButton", p_accent_color);
+	p_theme->set_color("font_hover_pressed_color", "CheckButton", p_accent_color);
+	p_theme->set_color("down_pressed_icon_modulate", "SpinBox", p_accent_color);
+	p_theme->set_color("up_pressed_icon_modulate", "SpinBox", p_accent_color);
+	p_theme->set_color("selection_stroke", "GraphEdit", p_accent_color);
+	p_theme->set_color("button_icon_pressed", "FoldableContainer", p_accent_color);
+	/* #endregion */
+
+	/* #region accent color 2*/
+	p_theme->set_color("search_result_color", "TextEdit", accent_color2);
+	p_theme->set_color("search_result_color", "CodeEdit", accent_color2);
+	/* #endregion */
+
+	/* #region bg color*/
+	p_theme->set_color("current_line_color", "TextEdit", bg_color);
+	p_theme->set_color("current_line_color", "CodeEdit", bg_color);
+	panel_style->set_bg_color(bg_color);
+	graph_panel_style->set_bg_color(bg_color);
+	graph_panel_selected_style->set_bg_color(bg_color);
+	/* #endregion */
+
+	/* #region base color 2*/
+	button_hover_style->set_bg_color(base_color2);
+	color_button_hover_style->set_bg_color(base_color2);
+	color_mode_button_hovered_style->set_bg_color(base_color2);
+	color_picker_button_hovered_style->set_bg_color(base_color2);
+	menu_button_hover_style->set_bg_color(base_color2);
+	slider_style->set_bg_color(base_color2);
+	picker_slider_style->set_bg_color(base_color2);
+	foldable_title_hover_style->set_bg_color(base_color2);
+	swatches_foldable_title_hover_style->set_bg_color(base_color2);
+	foldable_title_collapsed_hover_style->set_bg_color(base_color2);
+	swatches_foldable_title_collapsed_hover_style->set_bg_color(base_color2);
+	popup_hover_style->set_bg_color(base_color2);
+	/* #endregion */
+
+	/* #region base color 3*/
+	color_picker_popup_panel_style->set_bg_color(base_color3);
+	button_pressed_style->set_bg_color(base_color3);
+	popup_panel_style->set_bg_color(base_color3);
+	embedded_style->set_bg_color(base_color3);
+	color_sliders_panel_style->set_bg_color(base_color3);
+	color_mode_button_pressed_style->set_bg_color(base_color3);
+	progress_background_style->set_bg_color(base_color3);
+	foldable_panel_style->set_bg_color(base_color3);
+	swatches_foldable_panel_style->set_bg_color(base_color3);
+	p_theme->set_color("selection_color", "LineEdit", base_color3);
+	p_theme->set_color("selection_color", "TextEdit", base_color3);
+	p_theme->set_color("selection_color", "CodeEdit", base_color3);
+	p_theme->set_color("selection_color", "RichTextLabel", base_color3);
+	/* #endregion */
+
+	/* #region base color 4*/
+	embedded_unfocused_style->set_bg_color(base_color4);
+	tab_panel_style->set_bg_color(base_color4);
+	tab_selected_style->set_bg_color(base_color4);
+	p_theme->set_color("word_highlighted_color", "TextEdit", base_color4);
+	p_theme->set_color("word_highlighted_color", "CodeEdit", base_color4);
+	color_button_normal_style->set_bg_color(base_color4);
+	color_mode_button_normal_style->set_bg_color(base_color4);
+	color_picker_button_normal_style->set_bg_color(base_color4);
+	menu_button_normal_style->set_bg_color(base_color4);
+	h_scroll_style->set_bg_color(base_color4);
+	v_scroll_style->set_bg_color(base_color4);
+	foldable_title_style->set_bg_color(base_color4);
+	swatches_foldable_title_style->set_bg_color(base_color4);
+	foldable_title_collapsed_style->set_bg_color(base_color4);
+	swatches_foldable_title_collapsed_style->set_bg_color(base_color4);
+	graph_title_style->set_bg_color(base_color4);
+	graph_frame_title_style->set_bg_color(base_color4);
+	graph_title_selected_style->set_bg_color(p_base_color);
+	Color transparent_base_color4 = base_color4;
+	transparent_base_color4.a = 0.4;
+	button_disabled_style->set_bg_color(transparent_base_color4);
+	color_button_disabled_style->set_bg_color(transparent_base_color4);
+	color_picker_button_disabled_style->set_bg_color(transparent_base_color4);
+	menu_button_disabled_style->set_bg_color(transparent_base_color4);
+	/* #endregion */
+
+	/* #region luminance*/
+	float v = p_base_color.get_luminance() <= 0.5 ? 1.f : 0.f;
+	p_theme->set_color("grid_minor", "GraphEdit", Color(v, v, v, 0.05));
+	p_theme->set_color("grid_major", "GraphEdit", Color(v, v, v, 0.2));
+	p_theme->set_color("activity", "GraphEdit", Color(v, v, v));
+	p_theme->set_color("connection_hover_tint_color", "GraphEdit", Color(1.f - v, 1.f - v, 1.f - v, 0.3));
+	p_theme->set_color("connection_valid_target_tint_color", "GraphEdit", Color(v, v, v, 0.4));
+	/* #endregion */
+}
+/* #endregion Colors */
+
+/* #region Font */
 void update_font_color(Ref<Theme> &p_theme, Color p_color) {
 	popup_panel_style->set_border_color(p_color);
 	color_picker_popup_panel_style->set_border_color(p_color);
@@ -455,6 +597,7 @@ void update_font_color(Ref<Theme> &p_theme, Color p_color) {
 	p_theme->set_color(SceneStringName(font_color), "GraphFrameTitleLabel", p_color);
 	p_theme->set_color(SceneStringName(font_color), "ItemList", p_color);
 	p_theme->set_color(SceneStringName(font_color), "ColorButton", p_color);
+	p_theme->set_color("label_color", "SpinSlider", p_color);
 	p_theme->set_color("icon_normal_color", "Button", p_color);
 	p_theme->set_color("grabber_hovered", "SplitContainer", p_color);
 	p_theme->set_color("grabber_hovered", "HSplitContainer", p_color);
@@ -515,6 +658,7 @@ void update_font_color(Ref<Theme> &p_theme, Color p_color) {
 	p_theme->set_color("completion_scroll_hovered_color", "CodeEdit", p_color);
 	p_theme->set_color("completion_scroll_color", "CodeEdit", p_color);
 	p_theme->set_color("button_icon_disabled", "FoldableContainer", p_color);
+	p_theme->set_color("read_only_label_color", "SpinSlider", p_color);
 }
 
 void update_font_outline_color(Ref<Theme> &p_theme, Color p_color) {
@@ -543,142 +687,6 @@ void update_font_outline_color(Ref<Theme> &p_theme, Color p_color) {
 	p_theme->set_color("font_outline_color", "LinkButton", p_color);
 	p_theme->set_color("font_outline_color", "MenuBar", p_color);
 	p_theme->set_color("font_outline_color", "Button", p_color);
-}
-
-void update_theme_margins(Ref<Theme> &p_theme, int p_margin) {
-	int margin = p_margin * MAX(p_theme->get_default_base_scale(), 0.5);
-
-	p_theme->set_constant("separation", "BoxContainer", margin);
-	p_theme->set_constant("separation", "HBoxContainer", margin);
-	p_theme->set_constant("separation", "VBoxContainer", margin);
-	p_theme->set_constant("h_separation", "Button", margin);
-	p_theme->set_constant("h_separation", "FoldableContainer", margin);
-	p_theme->set_constant("h_separation", "Tree", margin);
-	p_theme->set_constant("h_separation", "ScrollContainer", margin);
-	p_theme->set_constant("h_separation", "TabBar", margin);
-	p_theme->set_constant("h_separation", "OptionButton", margin);
-	p_theme->set_constant("h_separation", "MenuButton", margin);
-	p_theme->set_constant("h_separation", "CheckBox", margin);
-	p_theme->set_constant("h_separation", "CheckButton", margin);
-	p_theme->set_constant("h_separation", "FlowContainer", margin);
-	p_theme->set_constant("v_separation", "FlowContainer", margin);
-	p_theme->set_constant("h_separation", "HFlowContainer", margin);
-	p_theme->set_constant("v_separation", "HFlowContainer", margin);
-	p_theme->set_constant("h_separation", "VFlowContainer", margin);
-	p_theme->set_constant("v_separation", "VFlowContainer", margin);
-	p_theme->set_constant("v_separation", "ScrollContainer", margin);
-	p_theme->set_constant("button_margin", "Tree", margin);
-	p_theme->set_constant("inner_margin_left", "Tree", margin);
-	p_theme->set_constant("inner_margin_right", "Tree", margin);
-	p_theme->set_constant("separation", "HSeparator", margin);
-	p_theme->set_constant("separation", "VSeparator", margin);
-	p_theme->set_constant("scrollbar_h_separation", "Tree", margin);
-	p_theme->set_constant("scrollbar_v_separation", "Tree", margin);
-	p_theme->set_constant("h_separation", "ItemList", margin);
-	p_theme->set_constant("v_separation", "ItemList", margin);
-	p_theme->set_constant("icon_margin", "ItemList", margin);
-	p_theme->set_constant("h_separation", "ColorButton", margin);
-	p_theme->set_constant("h_separation", "GridContainer", margin);
-	p_theme->set_constant("v_separation", "GridContainer", margin);
-}
-
-void update_theme_padding(Ref<Theme> &p_theme, int p_padding) {
-	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
-	int padding = p_padding * base_scale;
-
-	tab_selected_style->set_content_margin_individual(padding, padding - base_scale * 2, padding, padding);
-	tab_empty_style->set_content_margin_individual(padding, padding - base_scale * 2, padding, padding);
-	tab_panel_style->set_content_margin_all(padding);
-	flat_panel_style->set_content_margin_all(padding);
-	progress_background_style->set_content_margin_all(padding);
-	graph_frame_title_style->set_content_margin_all(padding);
-	graph_frame_title_selected_style->set_content_margin_all(padding);
-	foldable_panel_style->set_content_margin_individual(12 * base_scale, padding, padding, padding);
-	graph_title_style->set_content_margin_individual(12 * base_scale, padding, padding, padding);
-	graph_title_selected_style->set_content_margin_individual(12 * base_scale, padding, padding, padding);
-	foldable_title_style->set_content_margin_all(padding);
-	foldable_title_hover_style->set_content_margin_all(padding);
-	foldable_title_collapsed_style->set_content_margin_all(padding);
-	foldable_title_collapsed_hover_style->set_content_margin_all(padding);
-	p_theme->set_constant("margin_left", "MarginContainer", padding);
-	p_theme->set_constant("margin_top", "MarginContainer", padding);
-	p_theme->set_constant("margin_right", "MarginContainer", padding);
-	p_theme->set_constant("margin_bottom", "MarginContainer", padding);
-	p_theme->set_constant("item_start_padding", "PopupMenu", padding);
-	p_theme->set_constant("item_end_padding", "PopupMenu", padding);
-}
-
-void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
-	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
-	int corners = p_corner_radius * base_scale;
-
-	panel_style->set_corner_radius_all(corners);
-	button_hover_style->set_corner_radius_all(corners);
-	button_pressed_style->set_corner_radius_all(corners);
-	button_disabled_style->set_corner_radius_all(corners);
-	color_button_normal_style->set_corner_radius_all(corners);
-	color_button_hover_style->set_corner_radius_all(corners);
-	color_button_pressed_style->set_corner_radius_all(corners);
-	color_button_disabled_style->set_corner_radius_all(corners);
-	color_picker_button_hovered_style->set_corner_radius_all(corners);
-	color_picker_button_normal_style->set_corner_radius_all(corners);
-	color_picker_button_pressed_style->set_corner_radius_all(corners);
-	color_picker_button_disabled_style->set_corner_radius_all(corners);
-	grabber_style->set_corner_radius_all(corners);
-	grabber_highlight_style->set_corner_radius_all(corners);
-	slider_style->set_corner_radius_all(corners);
-	picker_slider_style->set_corner_radius_all(corners);
-	h_scroll_style->set_corner_radius_all(corners);
-	v_scroll_style->set_corner_radius_all(corners);
-	foldable_title_collapsed_style->set_corner_radius_all(corners);
-	swatches_foldable_title_collapsed_style->set_corner_radius_all(corners);
-	foldable_title_collapsed_hover_style->set_corner_radius_all(corners);
-	swatches_foldable_title_collapsed_hover_style->set_corner_radius_all(corners);
-	menu_button_normal_style->set_corner_radius_individual(corners, corners, 0, 0);
-	menu_button_hover_style->set_corner_radius_individual(corners, corners, 0, 0);
-	menu_button_pressed_style->set_corner_radius_individual(corners, corners, 0, 0);
-	menu_button_disabled_style->set_corner_radius_individual(corners, corners, 0, 0);
-	foldable_panel_style->set_corner_radius_individual(0, 0, corners, corners);
-	swatches_foldable_panel_style->set_corner_radius_individual(0, 0, corners, corners);
-	foldable_title_style->set_corner_radius_individual(corners, corners, 0, 0);
-	swatches_foldable_title_style->set_corner_radius_individual(corners, corners, 0, 0);
-	foldable_title_hover_style->set_corner_radius_individual(corners, corners, 0, 0);
-	swatches_foldable_title_hover_style->set_corner_radius_individual(corners, corners, 0, 0);
-	graph_panel_style->set_corner_radius_individual(0, 0, corners, corners);
-	graph_panel_selected_style->set_corner_radius_individual(0, 0, corners, corners);
-	graph_title_style->set_corner_radius_individual(corners, corners, 0, 0);
-	graph_frame_title_style->set_corner_radius_individual(corners, corners, 0, 0);
-	graph_title_selected_style->set_corner_radius_individual(corners, corners, 0, 0);
-	graph_frame_title_selected_style->set_corner_radius_individual(corners, corners, 0, 0);
-
-	int focus_border = MAX(p_corner_radius - 2, 0) * base_scale;
-	button_focus_style->set_corner_radius_all(focus_border);
-	color_button_focus_style->set_corner_radius_all(focus_border);
-	menu_button_focus_style->set_corner_radius_individual(focus_border, focus_border, 0, 0);
-}
-
-void update_theme_border_width(Ref<Theme> &p_theme, int p_border_width) {
-	int border_width = p_border_width * MAX(p_theme->get_default_base_scale(), 0.5);
-
-	panel_style->set_border_width_all(border_width);
-	popup_panel_style->set_content_margin_all(MAX(border_width, 1));
-	button_focus_style->set_border_width_all(MAX(border_width, 1));
-	menu_button_focus_style->set_border_width_all(MAX(border_width, 1));
-}
-
-void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
-	int border_padding = p_border_padding * MAX(p_theme->get_default_base_scale(), 0.5);
-
-	panel_style->set_content_margin_all(border_padding);
-	button_hover_style->set_content_margin_all(border_padding);
-	button_pressed_style->set_content_margin_all(border_padding);
-	button_disabled_style->set_content_margin_all(border_padding);
-	menu_button_normal_style->set_content_margin_all(border_padding);
-	menu_button_hover_style->set_content_margin_all(border_padding);
-	menu_button_pressed_style->set_content_margin_all(border_padding);
-	menu_button_disabled_style->set_content_margin_all(border_padding);
-	button_empty_style->set_content_margin_all(border_padding);
-	p_theme->set_constant("arrow_margin", "OptionButton", border_padding);
 }
 
 void update_font_outline_size(Ref<Theme> &p_theme, int p_outline_size) {
@@ -770,6 +778,212 @@ void update_font_spacing_bottom(int p_spacing) {
 	bold_font->set_spacing(TextServer::SPACING_BOTTOM, p_spacing);
 	bold_italics_font->set_spacing(TextServer::SPACING_BOTTOM, p_spacing);
 	italics_font->set_spacing(TextServer::SPACING_BOTTOM, p_spacing);
+}
+
+void update_theme_font(Ref<Theme> &p_theme, Ref<Font> p_font) {
+	if (p_font.is_valid()) {
+		if (p_font->is_class("FontVariation")) {
+			custom_font = p_font;
+			using_custom_font_variation = true;
+
+			Ref<Font> base_font = custom_font->get_base_font();
+			bold_font->set_base_font(base_font);
+			bold_italics_font->set_base_font(base_font);
+			italics_font->set_base_font(base_font);
+		} else {
+			custom_font = ThemeDB::get_singleton()->get_fallback_font()->duplicate();
+			custom_font->set_base_font(p_font);
+			using_custom_font_variation = false;
+
+			bold_font->set_base_font(p_font);
+			bold_italics_font->set_base_font(p_font);
+			italics_font->set_base_font(p_font);
+		}
+		p_theme->set_default_font(custom_font);
+
+	} else {
+		if (custom_font.is_valid()) {
+			custom_font = Ref<FontVariation>();
+			using_custom_font_variation = false;
+
+			Ref<Font> base_font = fallback_font->get_base_font();
+			bold_font->set_base_font(base_font);
+			bold_italics_font->set_base_font(base_font);
+			italics_font->set_base_font(base_font);
+		}
+		p_theme->set_default_font(Ref<Font>());
+	}
+}
+
+void update_font_subpixel_positioning(TextServer::SubpixelPositioning p_font_subpixel_positioning) {
+	Ref<FontFile> base_font = fallback_font->get_base_font();
+	base_font->set_subpixel_positioning(p_font_subpixel_positioning);
+}
+
+void update_font_antialiasing(TextServer::FontAntialiasing p_font_antialiasing) {
+	Ref<FontFile> base_font = fallback_font->get_base_font();
+	base_font->set_antialiasing(p_font_antialiasing);
+}
+
+void update_font_lcd_subpixel_layout(TextServer::FontLCDSubpixelLayout p_font_lcd_subpixel_layout) {
+	Ref<FontFile> base_font = fallback_font->get_base_font();
+	base_font->set_lcd_subpixel_layout(p_font_lcd_subpixel_layout);
+}
+
+void update_font_hinting(TextServer::Hinting p_font_hinting) {
+	Ref<FontFile> base_font = fallback_font->get_base_font();
+	base_font->set_hinting(p_font_hinting);
+}
+
+void update_font_msdf(bool p_font_msdf) {
+	Ref<FontFile> base_font = fallback_font->get_base_font();
+	base_font->set_multichannel_signed_distance_field(p_font_msdf);
+}
+
+void update_font_generate_mipmaps(bool p_font_generate_mipmaps) {
+	Ref<FontFile> base_font = fallback_font->get_base_font();
+	base_font->set_generate_mipmaps(p_font_generate_mipmaps);
+}
+/* #endregion Font */
+
+/* #region Constants */
+void update_theme_margins(Ref<Theme> &p_theme, int p_margin) {
+	int margin = p_margin * MAX(p_theme->get_default_base_scale(), 0.5);
+
+	p_theme->set_constant("separation", "BoxContainer", margin);
+	p_theme->set_constant("separation", "HBoxContainer", margin);
+	p_theme->set_constant("separation", "VBoxContainer", margin);
+	p_theme->set_constant("h_separation", "Button", margin);
+	p_theme->set_constant("h_separation", "FoldableContainer", margin);
+	p_theme->set_constant("h_separation", "Tree", margin);
+	p_theme->set_constant("h_separation", "ScrollContainer", margin);
+	p_theme->set_constant("h_separation", "TabBar", margin);
+	p_theme->set_constant("h_separation", "OptionButton", margin);
+	p_theme->set_constant("h_separation", "MenuButton", margin);
+	p_theme->set_constant("h_separation", "CheckBox", margin);
+	p_theme->set_constant("h_separation", "CheckButton", margin);
+	p_theme->set_constant("h_separation", "FlowContainer", margin);
+	p_theme->set_constant("v_separation", "FlowContainer", margin);
+	p_theme->set_constant("h_separation", "HFlowContainer", margin);
+	p_theme->set_constant("v_separation", "HFlowContainer", margin);
+	p_theme->set_constant("h_separation", "VFlowContainer", margin);
+	p_theme->set_constant("v_separation", "VFlowContainer", margin);
+	p_theme->set_constant("v_separation", "ScrollContainer", margin);
+	p_theme->set_constant("button_margin", "Tree", margin);
+	p_theme->set_constant("inner_margin_left", "Tree", margin);
+	p_theme->set_constant("inner_margin_right", "Tree", margin);
+	p_theme->set_constant("separation", "HSeparator", margin);
+	p_theme->set_constant("separation", "VSeparator", margin);
+	p_theme->set_constant("scrollbar_h_separation", "Tree", margin);
+	p_theme->set_constant("scrollbar_v_separation", "Tree", margin);
+	p_theme->set_constant("h_separation", "ItemList", margin);
+	p_theme->set_constant("v_separation", "ItemList", margin);
+	p_theme->set_constant("icon_margin", "ItemList", margin);
+	p_theme->set_constant("h_separation", "ColorButton", margin);
+	p_theme->set_constant("h_separation", "GridContainer", margin);
+	p_theme->set_constant("v_separation", "GridContainer", margin);
+}
+
+void update_theme_padding(Ref<Theme> &p_theme, int p_padding) {
+	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
+	int padding = p_padding * base_scale;
+
+	tab_selected_style->set_content_margin_individual(padding, padding - base_scale * 2, padding, padding);
+	tab_empty_style->set_content_margin_individual(padding, padding - base_scale * 2, padding, padding);
+	tab_panel_style->set_content_margin_all(padding);
+	flat_panel_style->set_content_margin_all(padding);
+	progress_background_style->set_content_margin_all(padding);
+	graph_frame_title_style->set_content_margin_all(padding);
+	graph_frame_title_selected_style->set_content_margin_all(padding);
+	foldable_panel_style->set_content_margin_individual(12 * base_scale, padding, padding, padding);
+	graph_title_style->set_content_margin_individual(12 * base_scale, padding, padding, padding);
+	graph_title_selected_style->set_content_margin_individual(12 * base_scale, padding, padding, padding);
+	foldable_title_style->set_content_margin_all(padding);
+	foldable_title_hover_style->set_content_margin_all(padding);
+	foldable_title_collapsed_style->set_content_margin_all(padding);
+	foldable_title_collapsed_hover_style->set_content_margin_all(padding);
+	spin_slider_label_style->set_content_margin(SIDE_RIGHT, padding);
+	p_theme->set_constant("margin_left", "MarginContainer", padding);
+	p_theme->set_constant("margin_top", "MarginContainer", padding);
+	p_theme->set_constant("margin_right", "MarginContainer", padding);
+	p_theme->set_constant("margin_bottom", "MarginContainer", padding);
+	p_theme->set_constant("item_start_padding", "PopupMenu", padding);
+	p_theme->set_constant("item_end_padding", "PopupMenu", padding);
+}
+
+void update_theme_corner_radius(Ref<Theme> &p_theme, int p_corner_radius) {
+	float base_scale = MAX(p_theme->get_default_base_scale(), 0.5);
+	int corners = p_corner_radius * base_scale;
+
+	panel_style->set_corner_radius_all(corners);
+	button_hover_style->set_corner_radius_all(corners);
+	button_pressed_style->set_corner_radius_all(corners);
+	button_disabled_style->set_corner_radius_all(corners);
+	color_button_normal_style->set_corner_radius_all(corners);
+	color_button_hover_style->set_corner_radius_all(corners);
+	color_button_pressed_style->set_corner_radius_all(corners);
+	color_button_disabled_style->set_corner_radius_all(corners);
+	color_picker_button_hovered_style->set_corner_radius_all(corners);
+	color_picker_button_normal_style->set_corner_radius_all(corners);
+	color_picker_button_pressed_style->set_corner_radius_all(corners);
+	color_picker_button_disabled_style->set_corner_radius_all(corners);
+	grabber_style->set_corner_radius_all(corners);
+	grabber_highlight_style->set_corner_radius_all(corners);
+	slider_style->set_corner_radius_all(corners);
+	picker_slider_style->set_corner_radius_all(corners);
+	h_scroll_style->set_corner_radius_all(corners);
+	v_scroll_style->set_corner_radius_all(corners);
+	foldable_title_collapsed_style->set_corner_radius_all(corners);
+	swatches_foldable_title_collapsed_style->set_corner_radius_all(corners);
+	foldable_title_collapsed_hover_style->set_corner_radius_all(corners);
+	swatches_foldable_title_collapsed_hover_style->set_corner_radius_all(corners);
+	menu_button_normal_style->set_corner_radius_individual(corners, corners, 0, 0);
+	menu_button_hover_style->set_corner_radius_individual(corners, corners, 0, 0);
+	menu_button_pressed_style->set_corner_radius_individual(corners, corners, 0, 0);
+	menu_button_disabled_style->set_corner_radius_individual(corners, corners, 0, 0);
+	foldable_panel_style->set_corner_radius_individual(0, 0, corners, corners);
+	swatches_foldable_panel_style->set_corner_radius_individual(0, 0, corners, corners);
+	foldable_title_style->set_corner_radius_individual(corners, corners, 0, 0);
+	swatches_foldable_title_style->set_corner_radius_individual(corners, corners, 0, 0);
+	foldable_title_hover_style->set_corner_radius_individual(corners, corners, 0, 0);
+	swatches_foldable_title_hover_style->set_corner_radius_individual(corners, corners, 0, 0);
+	graph_panel_style->set_corner_radius_individual(0, 0, corners, corners);
+	graph_panel_selected_style->set_corner_radius_individual(0, 0, corners, corners);
+	graph_title_style->set_corner_radius_individual(corners, corners, 0, 0);
+	graph_frame_title_style->set_corner_radius_individual(corners, corners, 0, 0);
+	graph_title_selected_style->set_corner_radius_individual(corners, corners, 0, 0);
+	graph_frame_title_selected_style->set_corner_radius_individual(corners, corners, 0, 0);
+	spin_slider_label_style->set_corner_radius_individual(corners, 0, 0, corners);
+
+	int focus_border = MAX(p_corner_radius - 2, 0) * base_scale;
+	button_focus_style->set_corner_radius_all(focus_border);
+	color_button_focus_style->set_corner_radius_all(focus_border);
+	menu_button_focus_style->set_corner_radius_individual(focus_border, focus_border, 0, 0);
+}
+
+void update_theme_border_width(Ref<Theme> &p_theme, int p_border_width) {
+	int border_width = p_border_width * MAX(p_theme->get_default_base_scale(), 0.5);
+
+	panel_style->set_border_width_all(border_width);
+	popup_panel_style->set_content_margin_all(MAX(border_width, 1));
+	button_focus_style->set_border_width_all(MAX(border_width, 1));
+	menu_button_focus_style->set_border_width_all(MAX(border_width, 1));
+}
+
+void update_theme_border_padding(Ref<Theme> &p_theme, int p_border_padding) {
+	int border_padding = p_border_padding * MAX(p_theme->get_default_base_scale(), 0.5);
+
+	panel_style->set_content_margin_all(border_padding);
+	button_hover_style->set_content_margin_all(border_padding);
+	button_pressed_style->set_content_margin_all(border_padding);
+	button_disabled_style->set_content_margin_all(border_padding);
+	menu_button_normal_style->set_content_margin_all(border_padding);
+	menu_button_hover_style->set_content_margin_all(border_padding);
+	menu_button_pressed_style->set_content_margin_all(border_padding);
+	menu_button_disabled_style->set_content_margin_all(border_padding);
+	button_empty_style->set_content_margin_all(border_padding);
+	p_theme->set_constant("arrow_margin", "OptionButton", border_padding);
+	spin_slider_label_style->set_content_margin(SIDE_LEFT, border_padding);
 }
 
 void update_theme_scale(Ref<Theme> &p_theme) {
@@ -903,208 +1117,7 @@ void update_theme_scale(Ref<Theme> &p_theme) {
 	p_theme->set_constant("separation", "HSplitContainer", x6_scale);
 	p_theme->set_constant("separation", "VSplitContainer", x6_scale);
 }
-
-void update_theme_colors(Ref<Theme> &p_theme, Color p_base_color, Color p_accent_color, float p_contrast, float p_base2_contrast, float p_base3_contrast, float p_base4_contrast, float p_accent2_contrast, float p_bg_contrast) {
-	Color contrasted_color = contrast_color(p_base_color, p_contrast);
-	Color base_color2 = p_base_color.lerp(contrasted_color, p_base2_contrast);
-	Color base_color3 = p_base_color.lerp(contrasted_color, p_base3_contrast);
-	Color base_color4 = p_base_color.lerp(contrasted_color, p_base4_contrast);
-	Color accent_color2 = p_accent_color.lerp(p_base_color, p_accent2_contrast);
-	Color bg_color = p_base_color.lerp(contrasted_color, p_bg_contrast);
-
-	/* #region base color*/
-	color_button_pressed_style->set_bg_color(p_base_color);
-	color_picker_button_pressed_style->set_bg_color(p_base_color);
-	menu_button_pressed_style->set_bg_color(p_base_color);
-	graph_frame_title_selected_style->set_bg_color(p_base_color);
-	flat_panel_style->set_bg_color(p_base_color);
-	/* #endregion */
-
-	/* #region accent color*/
-	button_focus_style->set_bg_color(p_accent_color);
-	color_button_focus_style->set_bg_color(p_accent_color);
-	menu_button_focus_style->set_bg_color(p_accent_color);
-	progress_fill_style->set_bg_color(p_accent_color);
-	grabber_highlight_style->set_bg_color(p_accent_color);
-	color_mode_button_pressed_style->set_border_color(p_accent_color);
-	tab_focus_style->set_border_color(p_accent_color);
-	graph_panel_selected_style->set_border_color(p_accent_color);
-	graph_frame_title_selected_style->set_border_color(p_accent_color);
-	graph_title_selected_style->set_border_color(p_accent_color);
-	button_focus_style->set_border_color(p_accent_color);
-	color_button_focus_style->set_border_color(p_accent_color);
-	menu_button_focus_style->set_border_color(p_accent_color);
-	tab_selected_style->set_border_color(p_accent_color);
-	p_theme->set_color("drop_mark_color", "TabContainer", p_accent_color);
-	p_theme->set_color("drop_mark_color", "TabBar", p_accent_color);
-	p_theme->set_color("icon_pressed_color", "Button", p_accent_color);
-	p_theme->set_color("icon_hover_pressed_color", "Button", p_accent_color);
-	p_theme->set_color("font_pressed_color", "Button", p_accent_color);
-	p_theme->set_color("font_pressed_color", "LinkButton", p_accent_color);
-	p_theme->set_color("font_hover_pressed_color", "Button", p_accent_color);
-	p_theme->set_color("font_hover_pressed_color", "LinkButton", p_accent_color);
-	p_theme->set_color("grabber_pressed", "SplitContainer", p_accent_color);
-	p_theme->set_color("grabber_pressed", "HSplitContainer", p_accent_color);
-	p_theme->set_color("grabber_pressed", "VSplitContainer", p_accent_color);
-	p_theme->set_color("clear_button_color_pressed", "LineEdit", p_accent_color);
-	p_theme->set_color("font_pressed_color", "MenuBar", p_accent_color);
-	p_theme->set_color("font_pressed_color", "OptionButton", p_accent_color);
-	p_theme->set_color("font_pressed_color", "MenuButton", p_accent_color);
-	p_theme->set_color("font_pressed_color", "CheckBox", p_accent_color);
-	p_theme->set_color("font_hover_pressed_color", "CheckBox", p_accent_color);
-	p_theme->set_color("font_pressed_color", "CheckButton", p_accent_color);
-	p_theme->set_color("font_hover_pressed_color", "CheckButton", p_accent_color);
-	p_theme->set_color("down_pressed_icon_modulate", "SpinBox", p_accent_color);
-	p_theme->set_color("up_pressed_icon_modulate", "SpinBox", p_accent_color);
-	p_theme->set_color("selection_stroke", "GraphEdit", p_accent_color);
-	p_theme->set_color("button_icon_pressed", "FoldableContainer", p_accent_color);
-	/* #endregion */
-
-	/* #region accent color 2*/
-	p_theme->set_color("search_result_color", "TextEdit", accent_color2);
-	p_theme->set_color("search_result_color", "CodeEdit", accent_color2);
-	/* #endregion */
-
-	/* #region bg color*/
-	p_theme->set_color("current_line_color", "TextEdit", bg_color);
-	p_theme->set_color("current_line_color", "CodeEdit", bg_color);
-	panel_style->set_bg_color(bg_color);
-	graph_panel_style->set_bg_color(bg_color);
-	graph_panel_selected_style->set_bg_color(bg_color);
-	/* #endregion */
-
-	/* #region bg color 2*/
-	button_hover_style->set_bg_color(base_color2);
-	color_button_hover_style->set_bg_color(base_color2);
-	color_mode_button_hovered_style->set_bg_color(base_color2);
-	color_picker_button_hovered_style->set_bg_color(base_color2);
-	menu_button_hover_style->set_bg_color(base_color2);
-	slider_style->set_bg_color(base_color2);
-	picker_slider_style->set_bg_color(base_color2);
-	foldable_title_hover_style->set_bg_color(base_color2);
-	swatches_foldable_title_hover_style->set_bg_color(base_color2);
-	foldable_title_collapsed_hover_style->set_bg_color(base_color2);
-	swatches_foldable_title_collapsed_hover_style->set_bg_color(base_color2);
-	popup_hover_style->set_bg_color(base_color2);
-	/* #endregion */
-
-	/* #region base color 3*/
-	color_picker_popup_panel_style->set_bg_color(base_color3);
-	button_pressed_style->set_bg_color(base_color3);
-	popup_panel_style->set_bg_color(base_color3);
-	embedded_style->set_bg_color(base_color3);
-	color_sliders_panel_style->set_bg_color(base_color3);
-	color_mode_button_pressed_style->set_bg_color(base_color3);
-	progress_background_style->set_bg_color(base_color3);
-	foldable_panel_style->set_bg_color(base_color3);
-	swatches_foldable_panel_style->set_bg_color(base_color3);
-	p_theme->set_color("selection_color", "LineEdit", base_color3);
-	p_theme->set_color("selection_color", "TextEdit", base_color3);
-	p_theme->set_color("selection_color", "CodeEdit", base_color3);
-	p_theme->set_color("selection_color", "RichTextLabel", base_color3);
-	/* #endregion */
-
-	/* #region base color 4*/
-	embedded_unfocused_style->set_bg_color(base_color4);
-	tab_panel_style->set_bg_color(base_color4);
-	tab_selected_style->set_bg_color(base_color4);
-	p_theme->set_color("word_highlighted_color", "TextEdit", base_color4);
-	p_theme->set_color("word_highlighted_color", "CodeEdit", base_color4);
-	color_button_normal_style->set_bg_color(base_color4);
-	color_mode_button_normal_style->set_bg_color(base_color4);
-	color_picker_button_normal_style->set_bg_color(base_color4);
-	menu_button_normal_style->set_bg_color(base_color4);
-	h_scroll_style->set_bg_color(base_color4);
-	v_scroll_style->set_bg_color(base_color4);
-	foldable_title_style->set_bg_color(base_color4);
-	swatches_foldable_title_style->set_bg_color(base_color4);
-	foldable_title_collapsed_style->set_bg_color(base_color4);
-	swatches_foldable_title_collapsed_style->set_bg_color(base_color4);
-	graph_title_style->set_bg_color(base_color4);
-	graph_frame_title_style->set_bg_color(base_color4);
-	graph_title_selected_style->set_bg_color(p_base_color);
-	Color transparent_base_color4 = base_color4;
-	transparent_base_color4.a = 0.4;
-	button_disabled_style->set_bg_color(transparent_base_color4);
-	color_button_disabled_style->set_bg_color(transparent_base_color4);
-	color_picker_button_disabled_style->set_bg_color(transparent_base_color4);
-	menu_button_disabled_style->set_bg_color(transparent_base_color4);
-	/* #endregion */
-
-	/* #region luminance*/
-	float v = p_base_color.get_luminance() <= 0.5 ? 1.f : 0.f;
-	p_theme->set_color("grid_minor", "GraphEdit", Color(v, v, v, 0.05));
-	p_theme->set_color("grid_major", "GraphEdit", Color(v, v, v, 0.2));
-	p_theme->set_color("activity", "GraphEdit", Color(v, v, v));
-	p_theme->set_color("connection_hover_tint_color", "GraphEdit", Color(1.f - v, 1.f - v, 1.f - v, 0.3));
-	p_theme->set_color("connection_valid_target_tint_color", "GraphEdit", Color(v, v, v, 0.4));
-	/* #endregion */
-}
-
-void update_theme_font(Ref<Theme> &p_theme, Ref<Font> p_font) {
-	if (p_font.is_valid()) {
-		if (p_font->is_class("FontVariation")) {
-			custom_font = p_font;
-			using_custom_font_variation = true;
-
-			Ref<Font> base_font = custom_font->get_base_font();
-			bold_font->set_base_font(base_font);
-			bold_italics_font->set_base_font(base_font);
-			italics_font->set_base_font(base_font);
-		} else {
-			custom_font = ThemeDB::get_singleton()->get_fallback_font()->duplicate();
-			custom_font->set_base_font(p_font);
-			using_custom_font_variation = false;
-
-			bold_font->set_base_font(p_font);
-			bold_italics_font->set_base_font(p_font);
-			italics_font->set_base_font(p_font);
-		}
-		p_theme->set_default_font(custom_font);
-
-	} else {
-		if (custom_font.is_valid()) {
-			custom_font = Ref<FontVariation>();
-			using_custom_font_variation = false;
-
-			Ref<Font> base_font = fallback_font->get_base_font();
-			bold_font->set_base_font(base_font);
-			bold_italics_font->set_base_font(base_font);
-			italics_font->set_base_font(base_font);
-		}
-		p_theme->set_default_font(Ref<Font>());
-	}
-}
-
-void update_font_subpixel_positioning(TextServer::SubpixelPositioning p_font_subpixel_positioning) {
-	Ref<FontFile> base_font = fallback_font->get_base_font();
-	base_font->set_subpixel_positioning(p_font_subpixel_positioning);
-}
-
-void update_font_antialiasing(TextServer::FontAntialiasing p_font_antialiasing) {
-	Ref<FontFile> base_font = fallback_font->get_base_font();
-	base_font->set_antialiasing(p_font_antialiasing);
-}
-
-void update_font_lcd_subpixel_layout(TextServer::FontLCDSubpixelLayout p_font_lcd_subpixel_layout) {
-	Ref<FontFile> base_font = fallback_font->get_base_font();
-	base_font->set_lcd_subpixel_layout(p_font_lcd_subpixel_layout);
-}
-
-void update_font_hinting(TextServer::Hinting p_font_hinting) {
-	Ref<FontFile> base_font = fallback_font->get_base_font();
-	base_font->set_hinting(p_font_hinting);
-}
-
-void update_font_msdf(bool p_font_msdf) {
-	Ref<FontFile> base_font = fallback_font->get_base_font();
-	base_font->set_multichannel_signed_distance_field(p_font_msdf);
-}
-
-void update_font_generate_mipmaps(bool p_font_generate_mipmaps) {
-	Ref<FontFile> base_font = fallback_font->get_base_font();
-	base_font->set_generate_mipmaps(p_font_generate_mipmaps);
-}
+/* #endregion Constants */
 
 void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPositioning p_font_subpixel, TextServer::Hinting p_font_hinting, TextServer::FontAntialiasing p_font_antialiasing, TextServer::FontLCDSubpixelLayout p_font_lcd_subpixel_layout, bool p_font_msdf, bool p_font_generate_mipmaps, Color p_base_color, Color p_accent_color, Color p_font_color, Color p_font_outline_color, float p_contrast, float p_base2_contrast, float p_base3_contrast, float p_base4_contrast, float p_accent2_contrast, float p_bg_contrast, int p_margin, int p_padding, int p_border_width, int p_corner_radius, int p_font_size, int p_font_outline, float p_font_embolden, int p_font_spacing_glyph, int p_font_spacing_space, int p_font_spacing_top, int p_font_spacing_bottom) {
 	float scale = CLAMP(p_scale, 0.5, 8.0);
@@ -1215,6 +1228,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	color_picker_button_hovered_style.instantiate();
 	color_picker_button_pressed_style.instantiate();
 	color_picker_button_disabled_style.instantiate();
+	spin_slider_label_style.instantiate();
 
 	update_theme_font(t, p_font);
 	update_font_color(t, p_font_color);
@@ -1438,6 +1452,7 @@ void make_default_theme(Ref<Font> p_font, float p_scale, TextServer::SubpixelPos
 	t->set_stylebox("focus", "PickerMenuButton", button_focus_style);
 	t->set_stylebox(CoreStringName(normal), "PickerLineEdit", color_picker_button_normal_style);
 	t->set_stylebox("read_only", "PickerLineEdit", color_picker_button_normal_style);
+	t->set_stylebox("label_bg", "SpinSlider", spin_slider_label_style);
 
 	v_separator_style->set_vertical(true);
 	tab_focus_style->set_draw_center(false);
@@ -1638,10 +1653,12 @@ void finalize_default_theme() {
 	color_picker_button_hovered_style.unref();
 	color_picker_button_pressed_style.unref();
 	color_picker_button_disabled_style.unref();
+	spin_slider_label_style.unref();
 
 	if (custom_font.is_valid()) {
 		custom_font.unref();
 	}
+
 	fallback_font.unref();
 	bold_font.unref();
 	bold_italics_font.unref();

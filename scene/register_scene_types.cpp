@@ -70,11 +70,6 @@
 #include "scene/gui/file_dialog.h"
 #include "scene/gui/flow_container.h"
 #include "scene/gui/foldable_container.h"
-#ifndef _GRAPH_DISABLED
-#include "scene/gui/graph/graph_edit.h"
-#include "scene/gui/graph/graph_frame.h"
-#include "scene/gui/graph/graph_node.h"
-#endif // !_GRAPH_DISABLED
 #include "scene/gui/grid_container.h"
 #include "scene/gui/item_list.h"
 #include "scene/gui/label.h"
@@ -97,6 +92,7 @@
 #include "scene/gui/separator.h"
 #include "scene/gui/slider.h"
 #include "scene/gui/spin_box.h"
+#include "scene/gui/spin_slider.h"
 #include "scene/gui/split_container.h"
 #include "scene/gui/subviewport_container.h"
 #include "scene/gui/tab_bar.h"
@@ -167,13 +163,18 @@
 #include "scene/resources/texture_rd.h"
 #include "scene/resources/theme.h"
 #include "scene/resources/video_stream.h"
+#include "scene/theme/theme_db.h"
 #ifndef _VISUAL_SHADER_DISABLED
 #include "scene/resources/visual_shader/visual_shader.h"
 #include "scene/resources/visual_shader/visual_shader_nodes.h"
 #include "scene/resources/visual_shader/visual_shader_particle_nodes.h"
 #include "scene/resources/visual_shader/visual_shader_sdf_nodes.h"
 #endif // !_VISUAL_SHADER_DISABLED
-#include "scene/theme/theme_db.h"
+#ifndef _GRAPH_DISABLED
+#include "scene/gui/graph/graph_edit.h"
+#include "scene/gui/graph/graph_frame.h"
+#include "scene/gui/graph/graph_node.h"
+#endif // !_GRAPH_DISABLED
 
 // 2D
 #include "scene/2d/animated_sprite_2d.h"
@@ -190,6 +191,26 @@
 #include "scene/2d/marker_2d.h"
 #include "scene/2d/mesh_instance_2d.h"
 #include "scene/2d/multimesh_instance_2d.h"
+#include "scene/2d/parallax_2d.h"
+#include "scene/2d/parallax_background.h"
+#include "scene/2d/parallax_layer.h"
+#include "scene/2d/path_2d.h"
+#include "scene/2d/polygon_2d.h"
+#include "scene/2d/remote_transform_2d.h"
+#include "scene/2d/skeleton_2d.h"
+#include "scene/2d/sprite_2d.h"
+#include "scene/2d/tile_map.h"
+#include "scene/2d/tile_map_layer.h"
+#include "scene/2d/visible_on_screen_notifier_2d.h"
+#include "scene/resources/2d/polygon_path_finder.h"
+#include "scene/resources/2d/skeleton/skeleton_modification_2d.h"
+#include "scene/resources/2d/skeleton/skeleton_modification_2d_ccdik.h"
+#include "scene/resources/2d/skeleton/skeleton_modification_2d_fabrik.h"
+#include "scene/resources/2d/skeleton/skeleton_modification_2d_lookat.h"
+#include "scene/resources/2d/skeleton/skeleton_modification_2d_stackholder.h"
+#include "scene/resources/2d/skeleton/skeleton_modification_2d_twoboneik.h"
+#include "scene/resources/2d/skeleton/skeleton_modification_stack_2d.h"
+#include "scene/resources/2d/tile_set.h"
 #ifndef _NAVIGATION_DISABLED
 #include "scene/2d/navigation/navigation_agent_2d.h"
 #include "scene/2d/navigation/navigation_link_2d.h"
@@ -198,11 +219,6 @@
 #include "scene/resources/2d/navigation/navigation_mesh_source_geometry_data_2d.h"
 #include "scene/resources/2d/navigation/navigation_polygon.h"
 #endif // !_NAVIGATION_DISABLED
-#include "scene/2d/parallax_2d.h"
-#include "scene/2d/parallax_background.h"
-#include "scene/2d/parallax_layer.h"
-#include "scene/2d/path_2d.h"
-
 #ifndef _PHYSICS_DISABLED
 #include "scene/2d/physics/animatable_body_2d.h"
 #include "scene/2d/physics/area_2d.h"
@@ -234,24 +250,48 @@
 #include "scene/resources/2d/skeleton/physics/skeleton_modification_2d_physicalbones.h"
 #endif // !_PHYSICS_DISABLED
 
-#include "scene/2d/polygon_2d.h"
-#include "scene/2d/remote_transform_2d.h"
-#include "scene/2d/skeleton_2d.h"
-#include "scene/2d/sprite_2d.h"
-#include "scene/2d/tile_map.h"
-#include "scene/2d/tile_map_layer.h"
-#include "scene/2d/visible_on_screen_notifier_2d.h"
-#include "scene/resources/2d/polygon_path_finder.h"
-#include "scene/resources/2d/skeleton/skeleton_modification_2d.h"
-#include "scene/resources/2d/skeleton/skeleton_modification_2d_ccdik.h"
-#include "scene/resources/2d/skeleton/skeleton_modification_2d_fabrik.h"
-#include "scene/resources/2d/skeleton/skeleton_modification_2d_lookat.h"
-#include "scene/resources/2d/skeleton/skeleton_modification_2d_stackholder.h"
-#include "scene/resources/2d/skeleton/skeleton_modification_2d_twoboneik.h"
-#include "scene/resources/2d/skeleton/skeleton_modification_stack_2d.h"
-#include "scene/resources/2d/tile_set.h"
-
 #ifndef _3D_DISABLED
+#include "scene/3d/audio_listener_3d.h"
+#include "scene/3d/audio_stream_player_3d.h"
+#include "scene/3d/bone_attachment_3d.h"
+#include "scene/3d/camera_3d.h"
+#include "scene/3d/cpu_particles_3d.h"
+#include "scene/3d/decal.h"
+#include "scene/3d/fog_volume.h"
+#include "scene/3d/gpu_particles_3d.h"
+#include "scene/3d/gpu_particles_collision_3d.h"
+#include "scene/3d/importer_mesh_instance_3d.h"
+#include "scene/3d/label_3d.h"
+#include "scene/3d/light_3d.h"
+#include "scene/3d/lightmap_gi.h"
+#include "scene/3d/lightmap_probe.h"
+#include "scene/3d/look_at_modifier_3d.h"
+#include "scene/3d/marker_3d.h"
+#include "scene/3d/mesh_instance_3d.h"
+#include "scene/3d/multimesh_instance_3d.h"
+#include "scene/3d/node_3d.h"
+#include "scene/3d/occluder_instance_3d.h"
+#include "scene/3d/path_3d.h"
+#include "scene/3d/reflection_probe.h"
+#include "scene/3d/remote_transform_3d.h"
+#include "scene/3d/retarget_modifier_3d.h"
+#include "scene/3d/skeleton_3d.h"
+#include "scene/3d/skeleton_ik_3d.h"
+#include "scene/3d/skeleton_modifier_3d.h"
+#include "scene/3d/sprite_3d.h"
+#include "scene/3d/visible_on_screen_notifier_3d.h"
+#include "scene/3d/voxel_gi.h"
+#include "scene/3d/world_environment.h"
+#include "scene/3d/xr_body_modifier_3d.h"
+#include "scene/3d/xr_face_modifier_3d.h"
+#include "scene/3d/xr_hand_modifier_3d.h"
+#include "scene/3d/xr_nodes.h"
+#include "scene/animation/root_motion_view.h"
+#include "scene/resources/3d/fog_material.h"
+#include "scene/resources/3d/importer_mesh.h"
+#include "scene/resources/3d/primitive_meshes.h"
+#include "scene/resources/3d/sky_material.h"
+#include "scene/resources/3d/world_3d.h"
 #ifndef _PHYSICS_DISABLED
 #include "scene/3d/physics/animatable_body_3d.h"
 #include "scene/3d/physics/area_3d.h"
@@ -295,47 +335,6 @@
 #include "scene/3d/navigation/navigation_region_3d.h"
 #include "scene/resources/3d/navigation/navigation_mesh_source_geometry_data_3d.h"
 #endif // !_NAVIGATION_DISABLED
-#include "scene/3d/audio_listener_3d.h"
-#include "scene/3d/audio_stream_player_3d.h"
-#include "scene/3d/bone_attachment_3d.h"
-#include "scene/3d/camera_3d.h"
-#include "scene/3d/cpu_particles_3d.h"
-#include "scene/3d/decal.h"
-#include "scene/3d/fog_volume.h"
-#include "scene/3d/gpu_particles_3d.h"
-#include "scene/3d/gpu_particles_collision_3d.h"
-#include "scene/3d/importer_mesh_instance_3d.h"
-#include "scene/3d/label_3d.h"
-#include "scene/3d/light_3d.h"
-#include "scene/3d/lightmap_gi.h"
-#include "scene/3d/lightmap_probe.h"
-#include "scene/3d/look_at_modifier_3d.h"
-#include "scene/3d/marker_3d.h"
-#include "scene/3d/mesh_instance_3d.h"
-#include "scene/3d/multimesh_instance_3d.h"
-#include "scene/3d/node_3d.h"
-#include "scene/3d/occluder_instance_3d.h"
-#include "scene/3d/path_3d.h"
-#include "scene/3d/reflection_probe.h"
-#include "scene/3d/remote_transform_3d.h"
-#include "scene/3d/retarget_modifier_3d.h"
-#include "scene/3d/skeleton_3d.h"
-#include "scene/3d/skeleton_ik_3d.h"
-#include "scene/3d/skeleton_modifier_3d.h"
-#include "scene/3d/sprite_3d.h"
-#include "scene/3d/visible_on_screen_notifier_3d.h"
-#include "scene/3d/voxel_gi.h"
-#include "scene/3d/world_environment.h"
-#include "scene/3d/xr_body_modifier_3d.h"
-#include "scene/3d/xr_face_modifier_3d.h"
-#include "scene/3d/xr_hand_modifier_3d.h"
-#include "scene/3d/xr_nodes.h"
-#include "scene/animation/root_motion_view.h"
-#include "scene/resources/3d/fog_material.h"
-#include "scene/resources/3d/importer_mesh.h"
-#include "scene/resources/3d/primitive_meshes.h"
-#include "scene/resources/3d/sky_material.h"
-#include "scene/resources/3d/world_3d.h"
 #endif // _3D_DISABLED
 
 static Ref<ResourceFormatSaverText> resource_saver_text;
@@ -493,6 +492,7 @@ void register_scene_types() {
 	GDREGISTER_CLASS(MenuButton);
 	GDREGISTER_CLASS(OptionButton);
 	GDREGISTER_CLASS(SpinBox);
+	GDREGISTER_CLASS(SpinSlider);
 	GDREGISTER_CLASS(ColorPicker);
 	GDREGISTER_CLASS(ColorButton);
 	GDREGISTER_CLASS(ColorPickerButton);
@@ -524,9 +524,11 @@ void register_scene_types() {
 	AcceptDialog::set_swap_cancel_ok(swap_cancel_ok);
 #endif // !ADVANCED_GUI_DISABLED
 
+#ifndef PIXEL_ENGINE
 	int root_dir = GLOBAL_GET("internationalization/rendering/root_node_layout_direction");
 	Control::set_root_layout_direction(root_dir);
 	Window::set_root_layout_direction(root_dir);
+#endif // PIXEL_ENGINE
 
 	/* REGISTER ANIMATION */
 	GDREGISTER_CLASS(Tween);
