@@ -141,7 +141,6 @@ void ColorPicker::_notification(int p_what) {
 			}
 			DisplayServer *ds = DisplayServer::get_singleton();
 			Vector2 ofs = ds->mouse_get_position();
-			picker_window->set_position(ofs - Vector2(28, 28));
 
 			Color c = DisplayServer::get_singleton()->screen_get_pixel(ofs);
 
