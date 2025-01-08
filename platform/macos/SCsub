@@ -11,13 +11,14 @@ import platform_macos_builders
 
 from platform_methods import get_build_version, lipo
 
+exec_name = "pixel" if env.pixel_engine else "godot"
 
 def generate_bundle(target, source, env):
     bin_dir = Dir("#bin").abspath
 
     if env.editor_build:
         # Editor bundle.
-        prefix = "godot." + env["platform"] + "." + env["target"]
+        prefix = f"{exec_name}." + env["platform"] + "." + env["target"]
         if env.dev_build:
             prefix += ".dev"
         if env["precision"] == "double":
@@ -128,7 +129,7 @@ files = [
     "gl_manager_macos_legacy.mm",
 ]
 
-prog = env.add_program("#bin/godot", files)
+prog = env.add_program(f"#bin/{exec_name}", files)
 
 if env["debug_symbols"] and env["separate_debug_symbols"]:
     env.AddPostAction(prog, env.Run(platform_macos_builders.make_debug_macos))

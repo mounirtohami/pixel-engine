@@ -339,3 +339,7 @@ name is available.
     忘忧の (Daylily-Zeleen)
     谢天 (jsjtxietian)
     风青山 (Rindbee)
+
+## Pixel Engine Contributers
+
+    Mounir Tohami (WhalesState)

@@ -6,34 +6,41 @@ on:
 env:
   # Used for the cache key. Add version suffix to force clean build.
   GODOT_BASE_BRANCH: master
-  SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no module_text_server_fb_enabled=yes strict_checks=yes
+  SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no strict_checks=yes
 
 jobs:
   build-android:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: Editor (target=editor)
-            cache-name: android-editor
-            target: editor
-            tests: false
-            sconsflags: arch=arm64 production=yes swappy=yes
-            cache-limit: 1
-
-          - name: Template arm32 (target=template_release, arch=arm32)
-            cache-name: android-template-arm32
-            target: template_release
+          - name: Pixel Debug (arch=arm32)
+            cache-name: android_pixel_debug_arm32
+            target: pixel_debug
             tests: false
             sconsflags: arch=arm32 swappy=yes
             cache-limit: 1
 
-          - name: Template arm64 (target=template_release, arch=arm64)
-            cache-name: android-template-arm64
-            target: template_release
+          - name: Pixel Release (arch=arm32)
+            cache-name: android_pixel_release_arm32
+            target: pixel_release
             tests: false
+            sconsflags: arch=arm32 swappy=yes
+            cache-limit: 1
+
+          - name: Pixel Debug (arch=arm64)
+            cache-name: android_pixel_debug_arm64
+            target: pixel_debug
+            # tests: false
+            sconsflags: arch=arm64 swappy=yes
+            cache-limit: 1
+
+          - name: Pixel Release (arch=arm64)
+            cache-name: android_pixel_release_arm64
+            target: pixel_release
+            # tests: false
             sconsflags: arch=arm64 swappy=yes
             cache-limit: 1
 
@@ -75,7 +82,7 @@ jobs:
           sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
           platform: android
           target: ${{ matrix.target }}
-          tests: ${{ matrix.tests }}
+          # tests: ${{ matrix.tests }}
           scons-cache-limit: ${{ matrix.cache-limit }}
 
       - name: Save Godot build cache
@@ -84,22 +91,21 @@ jobs:
           cache-name: ${{ matrix.cache-name }}
         continue-on-error: true
 
-      - name: Generate Godot templates
-        if: matrix.target == 'template_release'
-        run: |
-          cd platform/android/java
-          ./gradlew generateGodotTemplates
-          cd ../../..
-          ls -l bin/
+      # - name: Generate Godot templates
+      #   if: matrix.target == 'template_release'
+      #   run: |
+      #     cd platform/android/java
+      #     ./gradlew generateGodotTemplates
+      #     cd ../../..
+      #     ls -l bin/
 
       - name: Generate Godot editor
-        if: matrix.target == 'editor'
         run: |
           cd platform/android/java
           ./gradlew generateGodotEditor
-          ./gradlew generateGodotHorizonOSEditor
-          cd ../../..
-          ls -l bin/android_editor_builds/
+          cd ../../../bin
+          rm -f *.zip
+          rm -f *.aar
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact

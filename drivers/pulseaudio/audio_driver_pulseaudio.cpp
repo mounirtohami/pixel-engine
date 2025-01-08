@@ -314,7 +314,11 @@ Error AudioDriverPulseAudio::init() {
 	if (Engine::get_singleton()->is_editor_hint()) {
 		context_name = VERSION_NAME " Editor";
 	} else {
+#ifndef PIXEL_ENGINE
 		context_name = GLOBAL_GET("application/config/name");
+#else
+		context_name = "Pixel Engine";
+#endif // !PIXEL_ENGINE
 		if (context_name.is_empty()) {
 			context_name = VERSION_NAME " Project";
 		}

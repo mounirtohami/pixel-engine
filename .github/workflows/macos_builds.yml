@@ -6,7 +6,7 @@ on:
 env:
   # Used for the cache key. Add version suffix to force clean build.
   GODOT_BASE_BRANCH: master
-  SCONSFLAGS: verbose=yes warnings=extra werror=yes module_text_server_fb_enabled=yes strict_checks=yes
+  SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no strict_checks=yes
 
 jobs:
   build-macos:
@@ -16,19 +16,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Editor (target=editor, tests=yes)
-            cache-name: macos-editor
-            target: editor
-            tests: true
-            bin: ./bin/godot.macos.editor.universal
+          - name: Pixel Debug
+            cache-name: macos_pixel_engine_debug
+            target: pixel_debug
+            # bin: ./bin/pixel.macos.pixel_debug.universal
             cache-limit: 1
 
-          - name: Template (target=template_release, tests=yes)
-            cache-name: macos-template
-            target: template_release
-            tests: true
+          - name: Pixel Release
+            cache-name: macos_pixel_engine_release
+            target: pixel_release
             sconsflags: debug_symbols=no
-            bin: ./bin/godot.macos.template_release.universal
+            # bin: ./bin/pixel.macos.pixel_release.universal
             cache-limit: 1
 
     steps:
@@ -56,8 +54,7 @@ jobs:
           sconsflags: ${{ env.SCONSFLAGS }} arch=x86_64
           platform: macos
           target: ${{ matrix.target }}
-          tests: ${{ matrix.tests }}
-          scons-cache-limit: 0 # Only cap on second run to avoid purging unnecessarily
+          # tests: ${{ matrix.tests }}
 
       - name: Compilation (arm64)
         uses: ./.github/actions/godot-build
@@ -65,8 +62,7 @@ jobs:
           sconsflags: ${{ env.SCONSFLAGS }} arch=arm64
           platform: macos
           target: ${{ matrix.target }}
-          tests: ${{ matrix.tests }}
-          scons-cache-limit: ${{ matrix.cache-limit }}
+          # tests: ${{ matrix.tests }}
 
       - name: Save Godot build cache
         uses: ./.github/actions/godot-cache-save
@@ -76,19 +72,19 @@ jobs:
 
       - name: Prepare artifact
         run: |
-          lipo -create ./bin/godot.macos.${{ matrix.target }}.x86_64 ./bin/godot.macos.${{ matrix.target }}.arm64 -output ./bin/godot.macos.${{ matrix.target }}.universal
-          rm ./bin/godot.macos.${{ matrix.target }}.x86_64 ./bin/godot.macos.${{ matrix.target }}.arm64
-          strip bin/godot.*
-          chmod +x bin/godot.*
+          lipo -create ./bin/pixel.macos.${{ matrix.target }}.x86_64 ./bin/pixel.macos.${{ matrix.target }}.arm64 -output ./bin/pixel.macos.${{ matrix.target }}.universal
+          rm ./bin/pixel.macos.${{ matrix.target }}.x86_64 ./bin/pixel.macos.${{ matrix.target }}.arm64
+          strip bin/pixel.*
+          chmod +x bin/pixel.*
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
 
-      - name: Unit tests
-        if: matrix.tests
-        run: |
-          ${{ matrix.bin }} --version
-          ${{ matrix.bin }} --help
-          ${{ matrix.bin }} --test --force-colors
+      # - name: Unit tests
+      #   if: matrix.tests
+      #   run: |
+      #     ${{ matrix.bin }} --version
+      #     ${{ matrix.bin }} --help
+      #     ${{ matrix.bin }} --test --force-colors

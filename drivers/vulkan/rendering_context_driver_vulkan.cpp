@@ -682,12 +682,20 @@ Error RenderingContextDriverVulkan::_initialize_instance() {
 	// to anything but 1.0. Note that this value is only used by validation layers to warn us about version issues.
 	uint32_t application_api_version = instance_api_version == VK_API_VERSION_1_0 ? VK_API_VERSION_1_0 : VK_API_VERSION_1_2;
 
+#ifndef PIXEL_ENGINE
 	CharString cs = GLOBAL_GET("application/config/name").operator String().utf8();
+#else
+	CharString cs = String("Pixel Engine").utf8();
+#endif // !PIXEL_ENGINE
 	VkApplicationInfo app_info = {};
 	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	app_info.pApplicationName = cs.get_data();
 	app_info.pEngineName = VERSION_NAME;
+#ifndef PIXEL_ENGINE
 	app_info.engineVersion = VK_MAKE_VERSION(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+#else
+	app_info.engineVersion = VK_MAKE_VERSION(PIXEL_MAJOR, PIXEL_MINOR, PIXEL_PATCH);
+#endif // !PIXEL_ENGINE
 	app_info.apiVersion = application_api_version;
 
 	TightLocalVector<const char *> enabled_layer_names;

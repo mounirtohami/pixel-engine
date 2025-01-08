@@ -64,9 +64,9 @@ def get_build_version(short):
     name = "custom_build"
     if os.getenv("BUILD_NAME") is not None:
         name = os.getenv("BUILD_NAME")
-    v = "%d.%d" % (version.major, version.minor)
+    v = "%d.%d" % (version.pixel_minor, version.pixel_major)
     if version.patch > 0:
-        v += ".%d" % version.patch
+        v += ".%d" % version.pixel_patch
     status = version.status
     if not short:
         if os.getenv("GODOT_VERSION_STATUS") is not None:

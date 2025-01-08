@@ -185,6 +185,9 @@ def version_info_builder(target, source, env):
 #define VERSION_MAJOR {major}
 #define VERSION_MINOR {minor}
 #define VERSION_PATCH {patch}
+#define PIXEL_MAJOR {pixel_major}
+#define PIXEL_MINOR {pixel_minor}
+#define PIXEL_PATCH {pixel_patch}
 #define VERSION_STATUS "{status}"
 #define VERSION_BUILD "{build}"
 #define VERSION_MODULE_CONFIG "{module_config}"

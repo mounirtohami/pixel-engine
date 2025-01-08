@@ -10,26 +10,36 @@ env:
   EM_VERSION: 3.1.64
 
 jobs:
-  web-template:
-    runs-on: ubuntu-24.04
+  build-web:
+    runs-on: ubuntu-latest
     name: ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: Template w/ threads (target=template_release, threads=yes)
-            cache-name: web-template
-            target: template_release
-            sconsflags: threads=yes
-            tests: false
-            artifact: true
-
-          - name: Template w/o threads (target=template_release, threads=no)
-            cache-name: web-nothreads-template
-            target: template_release
+          - name: Pixel Debug (threads=no)
+            cache-name: web_pixel_debug_web
+            target: pixel_debug
             sconsflags: threads=no
-            tests: false
-            artifact: true
+            # tests: false
+
+          - name: Pixel Debug (threads=yes)
+            cache-name: web_pixel_debug_web_threads
+            target: pixel_debug
+            sconsflags: threads=yes
+            # tests: false
+
+          - name: Pixel Release (threads=no)
+            cache-name: web_pixel_release_web
+            target: pixel_release
+            sconsflags: threads=no
+            # tests: false
+
+          - name: Pixel Release (threads=yes)
+            cache-name: web_pixel_release_web_threads
+            target: pixel_release
+            sconsflags: threads=yes
+            # tests: false
 
     steps:
       - name: Checkout
@@ -62,7 +72,7 @@ jobs:
           sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
           platform: web
           target: ${{ matrix.target }}
-          tests: ${{ matrix.tests }}
+          # tests: ${{ matrix.tests }}
           scons-cache-limit: 0.5
 
       - name: Save Godot build cache
@@ -73,6 +83,5 @@ jobs:
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
-        if: matrix.artifact
         with:
           name: ${{ matrix.cache-name }}

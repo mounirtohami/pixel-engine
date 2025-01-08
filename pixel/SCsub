@@ -1,0 +1,11 @@
+from misc.utility.scons_hints import *
+
+Import("env")
+
+env.pixel_sources = []
+
+env.add_source_files(env.pixel_sources, "*.cpp")
+
+lib = env.add_library("pixel", env.pixel_sources)
+
+env.Prepend(LIBS=[lib])

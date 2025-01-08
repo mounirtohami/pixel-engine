@@ -31,7 +31,12 @@ def create_engine_file(env, target, source, externs, threads_enabled):
 
 
 def create_template_zip(env, js, wasm, side):
-    binary_name = "godot.editor" if env.editor_build else "godot"
+    if not env.pixel_engine:
+        binary_name = "godot.editor" if env.editor_build else "godot"
+    else:
+        binary_name = "pixel"
+    exec_name = "pixel" if env.pixel_engine else "godot"
+    exec_suffix = "${PROGSUFFIX}"
     zip_dir = env.Dir(env.GetTemplateZipPath())
     in_files = [
         js,
@@ -73,7 +78,7 @@ def create_template_zip(env, js, wasm, side):
             "___GODOT_THREADS_ENABLED___": "true" if env["threads"] else "false",
             "___GODOT_ENSURE_CROSSORIGIN_ISOLATION_HEADERS___": "true",
         }
-        html = env.Substfile(target="#bin/godot${PROGSUFFIX}.html", source=html, SUBST_DICT=subst_dict)
+        html = env.Substfile(target=f"#bin/{exec_name}{exec_suffix}.html", source=html, SUBST_DICT=subst_dict)
         in_files.append(html)
         out_files.append(zip_dir.File(binary_name + ".html"))
         # And logo/favicon
@@ -83,7 +88,7 @@ def create_template_zip(env, js, wasm, side):
         out_files.append(zip_dir.File("favicon.png"))
         # PWA
         service_worker = env.Substfile(
-            target="#bin/godot${PROGSUFFIX}.service.worker.js",
+            target=f"#bin/{exec_name}{exec_suffix}.service.worker.js",
             source=service_worker,
             SUBST_DICT=subst_dict,
         )
@@ -104,7 +109,7 @@ def create_template_zip(env, js, wasm, side):
 
     zip_files = env.InstallAs(out_files, in_files)
     env.Zip(
-        "#bin/godot",
+        f"#bin/{exec_name}",
         zip_files,
         ZIPROOT=zip_dir,
         ZIPSUFFIX="${PROGSUFFIX}${ZIPSUFFIX}",

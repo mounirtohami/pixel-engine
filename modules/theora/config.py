@@ -1,4 +1,6 @@
 def can_build(env, platform):
+    if env.pixel_engine:
+        return False
     if env["arch"].startswith("rv"):
         return False
     env.module_add_dependencies("theora", ["ogg", "vorbis"])

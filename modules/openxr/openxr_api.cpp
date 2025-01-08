@@ -584,10 +584,16 @@ bool OpenXRAPI::create_instance() {
 
 	// Create our OpenXR instance
 	XrApplicationInfo application_info{
+#ifndef PIXEL_ENGINE
 		"Godot Engine", // applicationName, if we're running a game we'll update this down below.
 		1, // applicationVersion, we don't currently have this
 		"Godot Engine", // engineName
 		VERSION_MAJOR * 10000 + VERSION_MINOR * 100 + VERSION_PATCH, // engineVersion 4.0 -> 40000, 4.0.1 -> 40001, 4.1 -> 40100, etc.
+#else
+		"Pixel Engine",
+		1,
+		PIXEL_MAJOR * 10000 + PIXEL_MINOR * 100 + PIXEL_PATCH,
+#endif // !PIXEL_ENGINE
 		XR_API_VERSION_1_0 // apiVersion
 	};
 
@@ -611,10 +617,14 @@ bool OpenXRAPI::create_instance() {
 	};
 
 	// Get our project name
+#ifndef PIXEL_ENGINE
 	String project_name = GLOBAL_GET("application/config/name");
 	if (!project_name.is_empty()) {
 		copy_string_to_char_buffer(project_name, instance_create_info.applicationInfo.applicationName, XR_MAX_APPLICATION_NAME_SIZE);
 	}
+#else
+	copy_string_to_char_buffer("Pixel Engine", instance_create_info.applicationInfo.applicationName, XR_MAX_APPLICATION_NAME_SIZE);
+#endif // !PIXEL_ENGINE
 
 	XrResult result = xrCreateInstance(&instance_create_info, &instance);
 	ERR_FAIL_COND_V_MSG(XR_FAILED(result), false, "Failed to create XR instance.");

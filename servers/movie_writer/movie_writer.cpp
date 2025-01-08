@@ -95,7 +95,11 @@ void MovieWriter::get_supported_extensions(List<String> *r_extensions) const {
 }
 
 void MovieWriter::begin(const Size2i &p_movie_size, uint32_t p_fps, const String &p_base_path) {
+#ifndef PIXEL_ENGINE
 	project_name = GLOBAL_GET("application/config/name");
+#else
+	project_name = "Pixel Engine";
+#endif // !PIXEL_ENGINE
 
 	print_line(vformat("Movie Maker mode enabled, recording movie at %d FPS...", p_fps));
 

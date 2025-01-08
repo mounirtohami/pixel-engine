@@ -1,5 +1,5 @@
 def can_build(env, platform):
-    return True
+    return not env.pixel_engine
 
 
 def get_opts(platform):

@@ -128,6 +128,9 @@ def get_version_info(module_version_string="", silent=False):
         "major": int(version.major),
         "minor": int(version.minor),
         "patch": int(version.patch),
+        "pixel_major": int(version.pixel_major),
+        "pixel_minor": int(version.pixel_minor),
+        "pixel_patch": int(version.pixel_patch),
         "status": str(version.status),
         "build": str(build_name),
         "module_config": str(version.module_config) + module_version_string,
@@ -239,8 +242,7 @@ def detect_modules(search_path, recursive=False):
         version_path = os.path.join(path, "version.py")
         if os.path.exists(version_path):
             with open(version_path, "r", encoding="utf-8") as f:
-                if 'short_name = "godot"' in f.read():
-                    return True
+                return 'short_name = "pixel"' in f.read()
         return False
 
     def get_files(path):
@@ -1179,8 +1181,9 @@ def generate_vs_project(env, original_args, project_name="godot"):
     sources_active = []
     others_active = []
 
+    exec_name = "pixel_engine" if env.pixel_engine else "godot"
     get_dependencies(
-        env.File(f"#bin/godot{env['PROGSUFFIX']}"), env, extensions, headers_active, sources_active, others_active
+        env.File(f"#bin/{exec_name}{env['PROGSUFFIX']}"), env, extensions, headers_active, sources_active, others_active
     )
 
     all_items = []
@@ -1241,7 +1244,7 @@ def generate_vs_project(env, original_args, project_name="godot"):
             properties.append(
                 "<ActiveProjectItemList_%s>;%s;</ActiveProjectItemList_%s>" % (x, ";".join(itemlist[x]), x)
             )
-        output = f'bin\\godot{env["PROGSUFFIX"]}'
+        output = f'bin\\{exec_name}{env["PROGSUFFIX"]}'
 
         with open("misc/msvs/props.template", "r", encoding="utf-8") as file:
             props_template = file.read()

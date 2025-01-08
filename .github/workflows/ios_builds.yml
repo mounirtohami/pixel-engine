@@ -6,12 +6,25 @@ on:
 env:
   # Used for the cache key. Add version suffix to force clean build.
   GODOT_BASE_BRANCH: master
-  SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no module_text_server_fb_enabled=yes strict_checks=yes
+  SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no strict_checks=yes
 
 jobs:
-  ios-template:
+  build-ios:
     runs-on: macos-latest
-    name: Template (target=template_release)
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Pixel Debug
+            cache-name: ios_pixel_engine_debug
+            target: pixel_debug
+            cache-limit: 2
+
+          - name: Pixel Release
+            cache-name: ios_pixel_engine_release
+            target: pixel_release
+            cache-limit: 2
 
     steps:
       - name: Checkout
@@ -21,6 +34,8 @@ jobs:
 
       - name: Restore Godot build cache
         uses: ./.github/actions/godot-cache-restore
+        with:
+          cache-name: ${{ matrix.cache-name }}
         continue-on-error: true
 
       - name: Setup Python and SCons
@@ -31,13 +46,17 @@ jobs:
         with:
           sconsflags: ${{ env.SCONSFLAGS }}
           platform: ios
-          target: template_release
+          target: ${{ matrix.target }}
           tests: false
           scons-cache-limit: 1
 
       - name: Save Godot build cache
         uses: ./.github/actions/godot-cache-save
+        with:
+          cache-name: ${{ matrix.cache-name }}
         continue-on-error: true
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
+        with:
+          name: ${{ matrix.cache-name }}

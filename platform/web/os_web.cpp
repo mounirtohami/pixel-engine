@@ -184,7 +184,11 @@ void OS_Web::vibrate_handheld(int p_duration_ms, float p_amplitude) {
 
 String OS_Web::get_user_data_dir(const String &p_user_dir) const {
 	String userfs = "/userfs";
+#ifndef PIXEL_ENGINE
 	return userfs.path_join(p_user_dir).replace("\\", "/");
+#else
+	return userfs.path_join(get_godot_dir_name()).replace("\\", "/");
+#endif // !PIXEL_ENGINE
 }
 
 String OS_Web::get_cache_path() const {

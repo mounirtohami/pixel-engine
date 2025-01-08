@@ -5316,6 +5316,7 @@ void DisplayServerX11::_update_context(WindowData &wd) {
 				break;
 		}
 
+#ifndef PIXEL_ENGINE
 		CharString class_str;
 		if (context == CONTEXT_ENGINE) {
 			String config_name = GLOBAL_GET("application/config/name");
@@ -5327,6 +5328,9 @@ void DisplayServerX11::_update_context(WindowData &wd) {
 		} else {
 			class_str = "Godot";
 		}
+#else
+		CharString class_str = "Pixel_Engine";
+#endif // !PIXEL_ENGINE
 
 		classHint->res_class = class_str.ptrw();
 		classHint->res_name = name_str.ptrw();
