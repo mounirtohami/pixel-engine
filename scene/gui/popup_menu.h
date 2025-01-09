@@ -37,6 +37,7 @@
 #include "scene/property_list_helper.h"
 #include "scene/resources/text_line.h"
 
+class PanelContainer;
 class ScrollContainer;
 class Timer;
 

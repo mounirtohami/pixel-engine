@@ -42,6 +42,7 @@
 #ifndef COLOR_MODE_H
 #define COLOR_MODE_H
 
+#include "core/object/ref_counted.h"
 #include "core/string/ustring.h"
 
 struct Color;
@@ -65,12 +66,12 @@ public:
 
 	virtual Color get_color() const = 0;
 
-	virtual void _value_changed() {};
+	virtual void _value_changed() {}
 
 	virtual void slider_draw(int p_which) = 0;
 
 	ColorMode(ColorPicker *p_color_picker);
-	virtual ~ColorMode() {};
+	virtual ~ColorMode() {}
 };
 
 class ColorModeHSV : public ColorMode {
@@ -94,7 +95,7 @@ public:
 	virtual void slider_draw(int p_which) override;
 
 	ColorModeHSV(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {};
+			ColorMode(p_color_picker) {}
 };
 
 class ColorModeRGB : public ColorMode {
@@ -115,7 +116,7 @@ public:
 	virtual void slider_draw(int p_which) override;
 
 	ColorModeRGB(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {};
+			ColorMode(p_color_picker) {}
 };
 
 class ColorModeRAW : public ColorMode {
@@ -136,7 +137,7 @@ public:
 	virtual void slider_draw(int p_which) override;
 
 	ColorModeRAW(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {};
+			ColorMode(p_color_picker) {}
 };
 
 class ColorModeOKHSL : public ColorMode {
@@ -161,9 +162,9 @@ public:
 	virtual void slider_draw(int p_which) override;
 
 	ColorModeOKHSL(ColorPicker *p_color_picker) :
-			ColorMode(p_color_picker) {};
+			ColorMode(p_color_picker) {}
 
-	~ColorModeOKHSL() {};
+	~ColorModeOKHSL() {}
 };
 
 #endif // COLOR_MODE_H
